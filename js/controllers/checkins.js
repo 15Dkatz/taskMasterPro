@@ -28,8 +28,7 @@ myApp.controller('CheckInsController',
 			};
 
 			checkinsInfo.$add(myData).then(function() {
-				$location.path('/checkins/' + $scope.whichuser + '/' + 
-					$scope.whichmeeting + '/checkinsList')
+				$location.path('/checkins/' + $scope.whichuser + '/' + $scope.whichmeeting + '/checkinsList')
 			});
 		}; //AddCheckin
 		//checkin -> go to a newpage.
