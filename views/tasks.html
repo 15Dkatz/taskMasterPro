@@ -1,0 +1,29 @@
+<div class="card">
+    <form ng-submit="genTasks(tasks, time)" novalidate=""> 
+      <!--   <ul>
+            <li> -->
+                <input type="text" ng-model="tasks" placeholder="Number of tasks?">
+            <!-- /li>
+            <l -->
+                <input type="text" name="time" ng-model="time" placeholder="Time for tasks?"> 
+            <!-- </li> -->
+            <button type="submit" ng-disabled="myform.$invalid">
+                Submit
+            </button>
+        <!-- </ul> -->
+    </form>
+
+    <ul>
+        <li ng-repeat="task in taskList">
+            <input type="text" placeholder="task{{task.name}}">
+            time: {{task.time}} 
+        </li> 
+    </ul>
+
+</div>
+
+
+<!-- goal 1: display tasks in firebase -->
+<!-- goal 2: organize more neatly, hide the ability to genTasks if tasks already exist in firebase. Turn the submit button into a restart button -->
+<!-- have tasks load for user if previous tasks already defined -->
+<!-- if user presses enter on tasks, rename the task to that task. -->
