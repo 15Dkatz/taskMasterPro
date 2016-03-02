@@ -16,17 +16,19 @@
             </button>
             time: {{task.time}} 
             <button ng-click="startTask()">
-                Start
+                Start Task
             </button>
             <button ng-click="stopTask(task)">
-                Stop
+                Complete Task
             </button>
-            <button ng-click="deleteTask(task)">
+            <!-- <button ng-click="deleteTask(task)">
                 Delete Task
-            </button>
+            </button> -->
         </li> 
     </ul>
-    <ul>
+
+    <ul ng-show="delTaskList">
+        <div> Completed Tasks </div>
         <li ng-repeat="task in delTaskList">
 
            <!--  <input type="text" placeholder="{{task.name}}" ng-model="taskName" id="taskName"> -->
