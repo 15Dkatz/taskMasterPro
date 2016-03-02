@@ -34,7 +34,10 @@
            <!--  <input type="text" placeholder="{{task.name}}" ng-model="taskName" id="taskName"> -->
             {{task.name}} | 
             time: {{task.time}} 
-        </li> 
+        </li>
+        <button ng-click="clearDeletedTasks()">
+            Clear Completed Tasks
+        </button> 
     </ul>
 
 

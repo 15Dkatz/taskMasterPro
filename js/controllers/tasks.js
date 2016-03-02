@@ -135,7 +135,14 @@ myApp.controller('TaskController',
 			$scope.taskList = tasksInfo;
 		}
 
-		// implement a clearTask method which clears the deletedTasks array, and keeps an overall count of the number of tasks that you have completed
+		// keep track of num deleted?
+
+		$scope.clearDeletedTasks = function() {
+		    var delTasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/deletedTasks');
+		    var record = $firebaseObject(delTasksRef);
+		    record.$remove(delTasksRef);
+			$scope.delTaskList = [];
+		}
 
 }]);
 
