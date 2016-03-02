@@ -21,8 +21,20 @@
             <button ng-click="stopTask(task)">
                 Stop
             </button>
+            <button ng-click="deleteTask(task)">
+                Delete Task
+            </button>
         </li> 
     </ul>
+    <ul>
+        <li ng-repeat="task in delTaskList">
+
+           <!--  <input type="text" placeholder="{{task.name}}" ng-model="taskName" id="taskName"> -->
+            {{task.name}} | 
+            time: {{task.time}} 
+        </li> 
+    </ul>
+
 
 </div>
 

@@ -14,14 +14,17 @@ myApp.controller('TaskController',
   //     $rootScope.currentUser = '';
   //   }
   // });
+  		var updateTasklist = function() {
+  			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
+			var tasksInfo = $firebaseArray(tasksRef);
+
+			$scope.taskList = tasksInfo;
+  		}
 
 
 		auth.$onAuth(function(authUser) {
 			if (authUser) {
-				var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id);
-				var tasksInfo = $firebaseArray(tasksRef);
-
-				$scope.taskList = tasksInfo;
+				updateTasklist();
 
 				$scope.genTasks = function(tasks, time) {
 					console.log(tasks, time);
@@ -33,13 +36,9 @@ myApp.controller('TaskController',
 					tasksInfo.$add(taskData);
 
 				}
-
 					// set $scope.taskList to firebase Array
 					$scope.taskList = tasksInfo;
 				} 
-
-
-
 			} //userAuthenticated
 		}) //on Authentication
 
@@ -70,33 +69,47 @@ myApp.controller('TaskController',
 
 			//reset times
 			var taskOrigTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
-			// var taskOrigTimeRefVal = taskOrigTimeRef.val();
-			// var taskOrigTimeObj = new $firebaseObject(taskOrigTimeRef);
-			// var taskOrigTime = taskOrigTimeObj["time"];
+			var newTime;
+			// if (task)
+			taskOrigTimeRef.on("value", function(snapshot) {
+				    if (snapshot.exists()) {
+				    	newTime = snapshot.val()["time"] + taskTime/$scope.taskList.length;
+				    }
+				}, function (errorObject) {
+				  console.log("The read failed: " + errorObject.code);
+			});
 
-			// var getTime = function(taskOrigTimeRef).$loaded().then(function(time) {
-			//   console.log(time.$value);
-			// });
-
-			// getTime();
-
-			//access the firebase attribute - !!!
-
-			//then re-calculate times.
-
-			console.log(taskOrigTimeRef.time + " tot " + taskTime);
-
-			// var remainderTime = taskOrigTime-taskTime;
-			// console.log(remainderTime);
+			console.log(newTime, "nt");
 
 			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
-			var tasksList = $firebaseArray(tasksRef);
+			var tasksArray = $firebaseArray(tasksRef);
+			console.log(tasksArray[1]);
+			for (var t=0; t<$scope.taskList.length; t++) {
+				taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
+
+				taskRef.update({"time": newTime});
+			}
+
+			updateTasklist();
 
 			taskTime = 0;
 
-
-
 		}
 
+		$scope.deleteTask = function(task) {
+			var refDel = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
+			// var tasksList = $firebaseArray(tasksRef);
+			var taskDel = $firebaseObject(refDel);
+			$scope.delTaskList.push(taskDel);
+			taskDel.$remove(task.$id);
+			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
+			var tasksInfo = $firebaseArray(tasksRef);
+
+
+
+			$scope.taskList = tasksInfo;
+		}
+
+		$scope.delTaskList = [];
 
 }]);
