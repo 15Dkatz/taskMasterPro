@@ -22,9 +22,13 @@
 	margin-left: 5%;
 }
 
+.start_btn {
+	margin-left: 10%;
+}
+
 /*nav {
     @extend .blue-text, .text-lighten-4;
  }*/
- nav {
+/* nav {
  	background: green darken-1;
- }
+ }*/
