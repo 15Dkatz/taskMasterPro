@@ -33,7 +33,12 @@
             <td><button ng-click="stopTask(task)" class="btn waves-effect">
                 Complete Task<i class="material-icons right">done</i>
             </button></td>
-            <td><span class="">time:  <span ng-show="task.showCurrent">{{currentTime}} </span> / {{task.time}} {{timeType.type}}</span></td>
+            <td>
+                <span class="">
+                    <span ng-if="!task.showCurrent">00:00:00</span>
+                    <span ng-if="task.showCurrent">{{currentTime}} </span>
+                    | {{task.timeDisplay}}</span>
+            </td>
         </tr> 
     </table>
 </div>

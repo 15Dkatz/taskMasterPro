@@ -18,20 +18,66 @@ myApp.controller('TaskController',
   		$scope.timeType = {type: "seconds"};
 
 
+
+// myDate = new Date();
+// myDate.setHours(10, 30, 53, 400);
+
+// document.write(myDate.getHours() + ":" + myDate.getMinutes() + ":" + myDate.getSeconds() + 
+// ":" + myDate.getMilliseconds());
+
+// // Output: 
+// // 10:30:53:400
+		function minTwoDigits(n) {
+	  		return (n < 10 ? '0' : '') + n;
+		}
+
 		auth.$onAuth(function(authUser) {
 			if (authUser) {
 				updateTasklist();
 				updateDelTaskList();
 
+				
+
+
 				$scope.genTasks = function(tasks, time, type) {
 					$scope.logoutStatus = true;
 					console.log(tasks, time, type);
+					var setTime = Math.round((time/tasks)*100)/100;
+
+					var myTimeDate = new Date();
+					var myTimeDisplay = "";
+					currentTimeDate = new Date();
+					if (type=='hours') {
+						if (setTime<1) {
+							myTimeDate.setHours(0, setTime*60, 0);
+						} else {
+							myTimeDate.setHours(setTime);
+							
+						}
+						// myTimeDisplay=minTwoDigits(myTimeDate.getHours())+":"+minTwoDigits(myTimeDate.getMinutes())+":"+minTwoDigits(myTimeDate.getSeconds());
+						// 	console.log(myTimeDisplay, "myTimeDisplay");
+					}
+					else if (type==='minutes') {
+						if (setTime<1) {
+							myTimeDate.setHours(0, 0, setTime*60);
+						} else {
+							myTimeDate.setHours(setTime);
+							
+						}
+					} else {
+						myTimeDate.setHours(0, 0, setTime)
+					}
+					myTimeDisplay=minTwoDigits(myTimeDate.getHours())+":"+minTwoDigits(myTimeDate.getMinutes())+":"+minTwoDigits(myTimeDate.getSeconds());
+					console.log(myTimeDisplay, "myTimeDisplay");
+
 					for (var t=0; t<tasks; t++) {
 					var taskData = {
 						name: "task" + String(t+1), 
-						time: Math.round((time/tasks)*100)/100,
+						time: setTime,
 						currentTime: 0,
-						showCurrent: false
+						showCurrent: false,
+						type: type,
+						timeDisplay: myTimeDisplay
 					}
 					tasksInfo.$add(taskData);
 
@@ -51,10 +97,12 @@ myApp.controller('TaskController',
 		//timing
 		var timer;
 		var taskTime = 0;
-		$scope.currentTime = 0;
+		$scope.currentTime = "00:00:00";
+
+		var currentTimeDate = new Date();
 
 		var addTime = function(task) {
-			console.log($scope.timeType["type"], 'ttt')
+			console.log($scope.currentTime, "ct");
 			switch($scope.timeType["type"]) {
 				case('seconds'):
 					taskTime += 0.1;
@@ -68,15 +116,25 @@ myApp.controller('TaskController',
 			}
 			
 			console.log(taskTime, "tt");
+
+			if (taskTime<60) {
+				currentTimeDate.setHours(0, 0, taskTime);
+			}
+			else if (taskTime<360) {
+				currentTimeDate.setHours(0, taskTime, 0);
+			}
+			else {
+				currentTimeDate.setHours(taskTime, 0, 0);	
+			}
 			$scope.$apply(function() {
-				$scope.currentTime=taskTime.toFixed(1);
+				$scope.currentTime=minTwoDigits(currentTimeDate.getHours())+":"+minTwoDigits(currentTimeDate.getMinutes())+":"+minTwoDigits(currentTimeDate.getSeconds());
 			});
 		}
 
 		var startOk = 0;
 
 		$scope.startTask = function(task) {
-			$scope.currentTime=0;
+			$scope.currentTime="00:00:00";
 			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 			taskRef.update({"showCurrent": true});
 			if (startOk<1) {
