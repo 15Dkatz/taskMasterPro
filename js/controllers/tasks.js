@@ -5,19 +5,6 @@ myApp.controller('TaskController',
 		var ref = new Firebase(FIREBASE_URL);
 		var auth = $firebaseAuth(ref);
 
-  		var constructTaskData = function(task, time) {
-  			if (task==null) {
-  				name="blankTask";
-  			}
-  			if (time==null) {
-  				time=0;
-  			}
-  			return {
-  				name: task,
-  				time: time
-  			}
-  		}
-
   		var tasksInfo;
   		var updateTasklist = function() {
   			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
@@ -37,12 +24,18 @@ myApp.controller('TaskController',
 					for (var t=0; t<tasks; t++) {
 					var taskData = {
 						name: "task" + String(t+1), 
-						time: time/tasks
+						time: time/tasks,
+						currentTime: 0,
+						showCurrent: false
 					}
 					tasksInfo.$add(taskData);
 
 				}
 					$scope.taskList = tasksInfo;
+					// add timer to each task in taskList so that you can see the changing of one time in 
+					// that one task
+
+
 				} 
 			} //userAuthenticated
 		}) //on Authentication
@@ -57,27 +50,48 @@ myApp.controller('TaskController',
 		//timing
 		var timer;
 		var taskTime = 0;
+		$scope.currentTime = 0;
 
-		var addTime = function() {
+		var addTime = function(task) {
 			taskTime += 0.1;
 			console.log(taskTime);
+			// console.log(task.currentTime);
+			// console.log($scope.taskList[task].currentTime, "ct");
+			$scope.$apply(function() {
+				$scope.currentTime=taskTime.toFixed(0);
+			});
+
+			// $scope.task.currentTime = taskTime;
 		}
 
-		$scope.startTask = function() {
-			timer=setInterval(addTime, 100);
+		var startOk = 0;
+
+		$scope.startTask = function(task) {
+			$scope.currentTime=0;
+			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
+			taskRef.update({"showCurrent": true});
+			if (startOk<1) {
+				timer=setInterval(addTime, 100, task);
+			}
+			startOk+=1; 
+
 		}
 
 		//default namevalues
 		var oldName="blankTask";
 		var oldTime=0;
 
+
+		// stopping and deletion of tasks ********************************************************************************
+
 		$scope.stopTask = function(task) {
+			startOk=0;
 			console.log(taskTime);
 			clearInterval(timer);
 			var taskOrigTimeRefChangeLim = 0;
 
 			var taskOrigTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
-			var newTime=0;
+			newTime=0;
 
 			taskOrigTimeRef.on("value", function(snapshot) {
 				    if (snapshot.exists()&&taskOrigTimeRefChangeLim<1&&$scope.taskList.length>1) {
@@ -90,8 +104,8 @@ myApp.controller('TaskController',
 				}, function (errorObject) {
 				  console.log("The read failed: " + errorObject.code);
 			});
-
-			// console.log(newTime, "nt");
+			// Math.floor10(55.59, -1);
+			newTime = Math.round(newTime*100)/100;
 
 			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
 			var tasksArray = $firebaseArray(tasksRef);
@@ -113,24 +127,35 @@ myApp.controller('TaskController',
 			var refDel = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/deletedTasks');
 			var delTasksInfo = $firebaseArray(refDel);
 			delTasksInfo.$add(taskObj);
-			console.log(delTasksInfo, "dti");
+			// console.log(delTasksInfo, "dti");
 			$scope.delTaskList = delTasksInfo;
 		}
+
+		var constructTaskData = function(task, time, currentTime) {
+  			if (task==null) {
+  				name="blankTask";
+  			}
+  			if (time==null) {
+  				time=0;
+  			}
+  			if (currentTime==null) {
+  				currentTime=0;
+  			}
+  			return {
+  				name: task,
+  				time: Math.round(time*100)/100,
+  				currentTime: Math.round(currentTime*100)/100
+  			}
+  		}
 
 		$scope.deleteTask = function(task) {
 			var taskRefDel = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 			var taskDel = $firebaseObject(taskRefDel);
-			addDelTasks(constructTaskData(oldName, oldTime))
-
-			// **************************************
-			// Add to delete function!
-			// add deleted time evenly to other tasks.
+			addDelTasks(constructTaskData(oldName, oldTime, taskTime))
 
 			taskDel.$remove(task.$id);
 			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
 			var tasksInfo = $firebaseArray(tasksRef);
-
-
 
 			$scope.taskList = tasksInfo;
 		}
@@ -146,10 +171,22 @@ myApp.controller('TaskController',
 
 }]);
 
-
+// ******************************************************************************************************************
 // Goals:
-// Make the user cannot press start while start is already going, to prevent slowing down of site.
-// implement a clearTask method which clears the deletedTasks array, and keeps an overall count of the number of tasks that you have completed
+
+// Add minutes, and hours **********!
+
 // Improve UX significantly
 
+
+
+// Ideas:
+
+// User Feedback:
+// e.g.
+// You still had more than half to go! (if difference more than 50%...)
+// You still had more than a quarter of the time to go! (difference>20%)
+// Just on time! (difference<5%)
+// Maybe a little quicker next time! (difference > -20%)
+// You really took your time on that one! (difference > -100%)
 

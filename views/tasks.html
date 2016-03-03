@@ -14,8 +14,9 @@
             <button type="submit" ng-click="renameTask(task, taskName)">
                 Rename
             </button>
-            time: {{task.time}} 
-            <button ng-click="startTask()">
+            time:  <span ng-show="task.showCurrent">{{currentTime}}</span> / {{task.time}} 
+            <!-- time:  <span>{{currentTime}}</span> / {{task.time}}  -->
+            <button ng-click="startTask(task)">
                 Start Task
             </button>
             <button ng-click="stopTask(task)">
@@ -33,7 +34,7 @@
 
            <!--  <input type="text" placeholder="{{task.name}}" ng-model="taskName" id="taskName"> -->
             {{task.name}} | 
-            time: {{task.time}} 
+            time: {{task.currentTime}}/{{task.time}} 
         </li>
         <button ng-click="clearDeletedTasks()">
             Clear Completed Tasks
@@ -47,7 +48,3 @@
 <!-- goal 1: display tasks in firebase -->
 <!-- goal 2: organize more neatly, hide the ability to genTasks if tasks already exist in firebase. Turn the submit button into a restart button -->
 <!-- if task already defined, add special styling to make black -->
-<!-- add a complete button which allows user to cross off tasks -->
-<!-- add timer function to each task -->
-<!-- add start button and end button -->
-<!-- dynamically retime tasks according to timer -->
