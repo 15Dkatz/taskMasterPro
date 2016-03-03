@@ -18,15 +18,6 @@ myApp.controller('TaskController',
   		$scope.timeType = {type: "seconds"};
 
 
-
-// myDate = new Date();
-// myDate.setHours(10, 30, 53, 400);
-
-// document.write(myDate.getHours() + ":" + myDate.getMinutes() + ":" + myDate.getSeconds() + 
-// ":" + myDate.getMilliseconds());
-
-// // Output: 
-// // 10:30:53:400
 		function minTwoDigits(n) {
 	  		return (n < 10 ? '0' : '') + n;
 		}
@@ -204,28 +195,29 @@ myApp.controller('TaskController',
   		}
 
 
-		var constructTaskData = function(task, time, currentTime, timeType) {
+		var constructTaskData = function(task, time) {
   			if (task==null) {
   				name="blankTask";
   			}
   			if (time==null) {
   				time=0;
   			}
-  			if (currentTime==null) {
-  				currentTime=0;
-  			}
+  			// if (currentTime==null) {
+  			// 	currentTime=0;
+  			// }
   			return {
   				name: task,
-  				time: Math.round(time*100)/100,
-  				currentTime: Math.round(currentTime*100)/100,
-  				type: timeType
+  				currentTime: $scope.currentTime,
+  				timeDisplay: time
+  				
   			}
   		}
 
 		$scope.deleteTask = function(task) {
 			var taskRefDel = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 			var taskDel = $firebaseObject(taskRefDel);
-			addDelTasks(constructTaskData(oldName, oldTime, taskTime, $scope.timeType["type"]))
+			console.log(task.timeDisplay, "td");
+			addDelTasks(constructTaskData(oldName, task.timeDisplay));
 
 			taskDel.$remove(task.$id);
 			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');

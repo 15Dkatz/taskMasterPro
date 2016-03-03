@@ -33,12 +33,10 @@
             <td><button ng-click="stopTask(task)" class="btn waves-effect">
                 Complete Task<i class="material-icons right">done</i>
             </button></td>
-            <td>
-                <span class="">
+            <td><span class="">
                     <span ng-if="!task.showCurrent">00:00:00</span>
                     <span ng-if="task.showCurrent">{{currentTime}} </span>
-                    | {{task.timeDisplay}}</span>
-            </td>
+                | {{task.timeDisplay}}</span></td>
         </tr> 
     </table>
 </div>
@@ -48,7 +46,7 @@
     <div class="collection-item"><h5>Completed Tasks</h5></div>
     <li ng-repeat="task in delTaskList" class="collection-item">
         {{task.name}} 
-        <span class="right">time: {{task.currentTime}}/{{task.time}} {{task.type}} </span>
+        <span class="right">{{task.currentTime}} | {{task.timeDisplay}} </span>
     </li>
     <div class="collection-item">
         <button ng-click="clearDeletedTasks()" class="btn">
