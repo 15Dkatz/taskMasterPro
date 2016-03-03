@@ -5,7 +5,7 @@
             <input type="text" ng-model="tasks" placeholder="Number of tasks?" ng-required="true">
         </div>
         <div class="collection-item">
-            <input type="text" ng-model="time" placeholder="Time for tasks?" ng-required="true">
+            <input type="text" ng-model="time" placeholder="Total time for tasks?" ng-required="true">
         </div>
         <div class="collection-item">
             <ul class="inline">
@@ -24,14 +24,9 @@
 
 <div class="collection">
     <table class="highlight centered">
-        <tr class="collection-item"><h5>Tasks to Complete</h5></tr>
+        <div class="collection-item"><tr class=""><h5>&nbsp;&nbsp;&nbsp;Tasks to Complete</h5></tr></div>
         <tr ng-repeat="task in taskList" class="collection-item">
             <td><input type="text" placeholder="{{task.name}}" ng-model="taskName" id="taskName"  ng-keyup="$event.keyCode == 13 && renameTask(task, taskName)" class="left"></td>
-            
-        <!--     <td><button type="submit" ng-click="renameTask(task, taskName)" class="btn waves-effect">
-                Rename<i class="material-icons right">label</i>
-            </button></td> -->
-            
             <td><button ng-click="startTask(task)" class="btn waves-effect start_btn">
                 Start Task<i class="material-icons right">play_arrow</i>
             </button></td>

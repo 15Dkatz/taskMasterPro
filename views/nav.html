@@ -1,21 +1,8 @@
- <!--  <div class="branding"><a ng-href="#/">taskMaster</a></div>
-  <ul>
-  	<li> -->
-  		<!-- <a ng-show="currentUser" ng-href="#/meetings">Meetings <span ng-show="howManyMeetings"class="badge">{{howManyMeetings}}</span>
-  		</a>
-  	</li>
-    
-  </ul> -->
-
-
 <nav class="brown lighten-1">
   <div class="nav-wrapper">
     <a ng-href="#/login" class="brand-logo">TaskMaster<i class="material-icons right">done_all</i></a>
     <ul class="right">
-      <li><a  ng-href="#/login" ng-hide="currentUser">Login</a></li>
-      <!-- <li><a  ng-if="location.path() == '#/login'" ng-href="#/register">Register</a></li> -->
-     <!--  <li><a ng-href="#/login">Login</a></li>
-      <li><a ng-href="#/register">Register</a></li> -->
+      <!-- <li><a  ng-href="#/register" ng-hide="currentUser">Register</a></li> -->
       <li><a ng-href="#/login" ng-click="logout()" ng-show="currentUser" >logout</a></li>
     </ul>
   </div>

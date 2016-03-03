@@ -17,14 +17,11 @@ myApp.controller('TaskController',
   		$scope.timeTypes = ["seconds", "minutes", "hours"];
   		$scope.timeType = {type: "seconds"};
 
-  		$scope.logoutStatus=false;
 
 		auth.$onAuth(function(authUser) {
 			if (authUser) {
 				updateTasklist();
 				updateDelTaskList();
-
-				$scope.logoutStatus = true;
 
 				$scope.genTasks = function(tasks, time, type) {
 					$scope.logoutStatus = true;
@@ -32,7 +29,7 @@ myApp.controller('TaskController',
 					for (var t=0; t<tasks; t++) {
 					var taskData = {
 						name: "task" + String(t+1), 
-						time: time/tasks,
+						time: Math.round((time/tasks)*100)/100,
 						currentTime: 0,
 						showCurrent: false
 					}
@@ -89,7 +86,6 @@ myApp.controller('TaskController',
 
 		}
 
-		//default namevalues
 		var oldName="blankTask";
 		var oldTime=0;
 
@@ -139,7 +135,6 @@ myApp.controller('TaskController',
 			var refDel = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/deletedTasks');
 			var delTasksInfo = $firebaseArray(refDel);
 			delTasksInfo.$add(taskObj);
-			// console.log(delTasksInfo, "dti");
 			$scope.delTaskList = delTasksInfo;
 		}
 
@@ -204,8 +199,11 @@ myApp.controller('TaskController',
 
 // Ideas:
 
+// limit the display to two decimal places for time.
+// convert hours to minutes, hours, minutes, seconds, 00:15
+
 // User Feedback:
-// e.g.
+// e.g.v 
 // You still had more than half to go! (if difference more than 50%...)
 // You still had more than a quarter of the time to go! (difference>20%)
 // Just on time! (difference<5%)

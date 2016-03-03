@@ -3,10 +3,6 @@
     ng-submit="login()"
     novalidate>
 
-<!--     <div class="textintro">
-      <p>Log-in to access taskmaster!</p>
-    </div>
- -->
     <fieldset>
       <input type="email" name="email" placeholder="Email"
        ng-model="user.email" ng-required="true">
@@ -24,6 +20,7 @@
     </fieldset>
 
     <button type="submit" class="btn" ng-disabled="myform.$invalid">Login</button>
-    <a class="btn" ng-href="#/register">register</a>
+    <!-- <a class="btn" ng-href="#/register">register</a> -->
+    <p> or <a ng-href="#/register">register</a> if you haven't signed up </p>
   </form>
 </section>
