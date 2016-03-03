@@ -17,3 +17,14 @@
 /*li {
 	display: inline;
 }*/
+
+.submit_btn  {
+	margin-left: 5%;
+}
+
+/*nav {
+    @extend .blue-text, .text-lighten-4;
+ }*/
+ nav {
+ 	background: green darken-1;
+ }

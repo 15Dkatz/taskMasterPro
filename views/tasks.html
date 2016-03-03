@@ -15,8 +15,8 @@
                     </li>
                 </ul>
 
-                <button type="submit" ng-disabled="myform.$invalid" class="btn waves-effect">
-                    Submit
+                <button type="submit" ng-disabled="myform.$invalid" class="btn waves-effect submit_btn">
+                    Submit<i class="material-icons right">system_update_alt</i>
                 </button>
             </div>
         </form>
@@ -28,14 +28,14 @@
             <input type="text" placeholder="{{task.name}}" ng-model="taskName" id="taskName">
             <span class="badge">time:  <span ng-show="task.showCurrent">{{currentTime}} </span> / {{task.time}} {{timeType.type}}</span> 
             <button type="submit" ng-click="renameTask(task, taskName)" class="btn waves-effect">
-                Rename
+                Rename<i class="material-icons right">label</i>
             </button>
             
             <button ng-click="startTask(task)" class="btn waves-effect">
-                Start Task
+                Start Task<i class="material-icons right">play_arrow</i>
             </button>
             <button ng-click="stopTask(task)" class="btn waves-effect">
-                Complete Task
+                Complete Task<i class="material-icons right">done</i>
             </button>
         </li> 
     </ul>
@@ -50,7 +50,7 @@
         </li>
         <div class="collection-item">
             <button ng-click="clearDeletedTasks()" class="btn">
-                Clear Completed Tasks
+                Clear Completed Tasks<i class="material-icons right">delete</i>
             </button> 
         </div>
     </ul>
