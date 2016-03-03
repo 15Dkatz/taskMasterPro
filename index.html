@@ -25,7 +25,9 @@
 </head>
 <body>
 <header>
-  <nav class="cf" ng-include="'views/nav.html'"></nav>
+  <div ng-controller="RegistrationController">
+    <nav class="cf" ng-include="'views/nav.html'"></nav>
+  </div>
 </header>
 <div class="">
 
@@ -34,7 +36,7 @@
     <a ng-href="#/login" ng-click="logout()">logout</a>
   </div> -->
   <div ng-controller="RegistrationController">
-    <a ng-href="#/login" ng-click="logout()">logout</a>
+    
   </div>
 
   <main class="" ng-view>

@@ -13,14 +13,22 @@ myApp.controller('TaskController',
 			$scope.taskList = tasksInfo;
   		}
 
-  		// updateTasklist();
+
+  		$scope.timeTypes = ["seconds", "minutes", "hours"];
+  		$scope.timeType = {type: "seconds"};
+
+  		$scope.logoutStatus=false;
 
 		auth.$onAuth(function(authUser) {
 			if (authUser) {
 				updateTasklist();
+				updateDelTaskList();
 
-				$scope.genTasks = function(tasks, time) {
-					console.log(tasks, time);
+				$scope.logoutStatus = true;
+
+				$scope.genTasks = function(tasks, time, type) {
+					$scope.logoutStatus = true;
+					console.log(tasks, time, type);
 					for (var t=0; t<tasks; t++) {
 					var taskData = {
 						name: "task" + String(t+1), 
@@ -32,10 +40,6 @@ myApp.controller('TaskController',
 
 				}
 					$scope.taskList = tasksInfo;
-					// add timer to each task in taskList so that you can see the changing of one time in 
-					// that one task
-
-
 				} 
 			} //userAuthenticated
 		}) //on Authentication
@@ -53,15 +57,23 @@ myApp.controller('TaskController',
 		$scope.currentTime = 0;
 
 		var addTime = function(task) {
-			taskTime += 0.1;
-			console.log(taskTime);
-			// console.log(task.currentTime);
-			// console.log($scope.taskList[task].currentTime, "ct");
+			console.log($scope.timeType["type"], 'ttt')
+			switch($scope.timeType["type"]) {
+				case('seconds'):
+					taskTime += 0.1;
+					break;
+				case('minutes'):
+					taskTime += 0.001666666667;
+					break;
+				case('hours'):
+					taskTime += 0.0002777777778;
+					break;
+			}
+			
+			console.log(taskTime, "tt");
 			$scope.$apply(function() {
-				$scope.currentTime=taskTime.toFixed(0);
+				$scope.currentTime=taskTime.toFixed(1);
 			});
-
-			// $scope.task.currentTime = taskTime;
 		}
 
 		var startOk = 0;
@@ -131,7 +143,15 @@ myApp.controller('TaskController',
 			$scope.delTaskList = delTasksInfo;
 		}
 
-		var constructTaskData = function(task, time, currentTime) {
+		var updateDelTaskList = function() {
+  			var refDelL = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/deletedTasks');
+			var delTasksInfoL = $firebaseArray(refDelL);
+
+			$scope.delTaskList = delTasksInfoL;
+  		}
+
+
+		var constructTaskData = function(task, time, currentTime, timeType) {
   			if (task==null) {
   				name="blankTask";
   			}
@@ -144,14 +164,15 @@ myApp.controller('TaskController',
   			return {
   				name: task,
   				time: Math.round(time*100)/100,
-  				currentTime: Math.round(currentTime*100)/100
+  				currentTime: Math.round(currentTime*100)/100,
+  				type: timeType
   			}
   		}
 
 		$scope.deleteTask = function(task) {
 			var taskRefDel = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 			var taskDel = $firebaseObject(taskRefDel);
-			addDelTasks(constructTaskData(oldName, oldTime, taskTime))
+			addDelTasks(constructTaskData(oldName, oldTime, taskTime, $scope.timeType["type"]))
 
 			taskDel.$remove(task.$id);
 			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
@@ -174,8 +195,9 @@ myApp.controller('TaskController',
 // ******************************************************************************************************************
 // Goals:
 
-// Add minutes, and hours **********!
+// Path: /Users/davidkatz/Coding/webDev/15Dkatz/15Dkatz.github.io/projects/taskMaster
 
+// Add minutes, and hours **********!
 // Improve UX significantly
 
 

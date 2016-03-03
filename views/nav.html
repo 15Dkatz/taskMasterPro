@@ -1,11 +1,22 @@
-  <div class="branding"><a ng-href="#/">taskMaster</a></div>
+ <!--  <div class="branding"><a ng-href="#/">taskMaster</a></div>
   <ul>
-  	<li>
+  	<li> -->
   		<!-- <a ng-show="currentUser" ng-href="#/meetings">Meetings <span ng-show="howManyMeetings"class="badge">{{howManyMeetings}}</span>
-  		</a> -->
+  		</a>
   	</li>
-    <!-- <li><a ng-hide="currentUser" ng-href="#/login">Login</a></li>
-    <li><a ng-hide="currentUser" ng-href="#/register">Register</a></li> -->
-    <li><a ng-href="#/login">Login</a></li>
-    <li><a ng-href="#/register">Register</a></li>
-  </ul>
+    
+  </ul> -->
+
+
+<nav>
+  <div class="nav-wrapper">
+    <a ng-href="#/login" class="brand-logo">TaskMaster</a>
+    <ul class="right">
+      <!-- <li><a  ng-href="#/login" ng-show="currentUser">Login</a></li> -->
+      <!-- <li><a  ng-if="location.path() == '#/login'" ng-href="#/register">Register</a></li> -->
+     <!--  <li><a ng-href="#/login">Login</a></li>
+      <li><a ng-href="#/register">Register</a></li> -->
+      <li><a ng-href="#/login" ng-click="logout()" ng-show="currentUser" >logout</a></li>
+    </ul>
+  </div>
+</nav>
