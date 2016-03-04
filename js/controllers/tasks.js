@@ -18,7 +18,7 @@ myApp.controller('TaskController',
   		$scope.timeType = {type: "seconds"};
 
 
-		function minTwoDigits(n) {
+		var minTwoDigits = function(n) {
 	  		return (n < 10 ? '0' : '') + n;
 		}
 
@@ -26,9 +26,6 @@ myApp.controller('TaskController',
 			if (authUser) {
 				updateTasklist();
 				updateDelTaskList();
-
-				
-
 
 				$scope.genTasks = function(tasks, time, type) {
 					$scope.logoutStatus = true;
@@ -38,27 +35,31 @@ myApp.controller('TaskController',
 					var myTimeDate = new Date();
 					var myTimeDisplay = "";
 					currentTimeDate = new Date();
-					if (type=='hours') {
-						if (setTime<1) {
-							myTimeDate.setHours(0, setTime*60, 0);
-						} else {
-							myTimeDate.setHours(setTime);
+
+					console.log(setTime, "setTime"); //not running??
+					// console.log(timeType.type, "type here!")
+					// if (type=='hours') {
+					// 	if (setTime<1) {
+					// 		myTimeDate.setHours(0, setTime*60, 0);
+					// 	} else {
+					// 		myTimeDate.setHours(setTime);
 							
-						}
-						// myTimeDisplay=minTwoDigits(myTimeDate.getHours())+":"+minTwoDigits(myTimeDate.getMinutes())+":"+minTwoDigits(myTimeDate.getSeconds());
-						// 	console.log(myTimeDisplay, "myTimeDisplay");
-					}
-					else if (type==='minutes') {
-						if (setTime<1) {
-							myTimeDate.setHours(0, 0, setTime*60);
-						} else {
-							myTimeDate.setHours(setTime);
+					// 	}
+					// 	// myTimeDisplay=minTwoDigits(myTimeDate.getHours())+":"+minTwoDigits(myTimeDate.getMinutes())+":"+minTwoDigits(myTimeDate.getSeconds());
+					// 	// 	console.log(myTimeDisplay, "myTimeDisplay");
+					// }
+					// else if (type==='minutes') {
+					// 	if (setTime<1) {
+					// 		myTimeDate.setHours(0, 0, setTime*60);
+					// 	} else {
+					// 		myTimeDate.setHours(setTime);
 							
-						}
-					} else {
-						myTimeDate.setHours(0, 0, setTime)
-					}
-					myTimeDisplay=minTwoDigits(myTimeDate.getHours())+":"+minTwoDigits(myTimeDate.getMinutes())+":"+minTwoDigits(myTimeDate.getSeconds());
+					// 	}
+					// } else {
+					// 	myTimeDate.setHours(0, 0, setTime)
+					// }
+					// myTimeDisplay=minTwoDigits(myTimeDate.getHours())+":"+minTwoDigits(myTimeDate.getMinutes())+":"+minTwoDigits(myTimeDate.getSeconds());
+					myTimeDisplay = toTimeDisplay(setTime, type);
 					console.log(myTimeDisplay, "myTimeDisplay");
 
 					for (var t=0; t<tasks; t++) {
@@ -137,11 +138,63 @@ myApp.controller('TaskController',
 
 		var oldName="blankTask";
 		var oldTime=0;
+		var taskType="";
+		var newTime=0;
 
 
 		// stopping and deletion of tasks ********************************************************************************
+		var toTimeDisplay = function(time, type) {
+			console.log("converting!", time, "in", type);
+			var taskTimeDate = new Date();
+			// if (type===	'hours') {
+			// 	// if (time<1) {
+			// 	// 	taskTimeDate.setHours(0, Math.ceil(time*60), 0);
+			// 	// } else {
+			// 	// 	taskTimeDate.setHours(time);
+			// 	// }
+			// }
+			// else 
+			if (type==='minutes') {
+				time=time*0.01;
+				// if (time<1) {
+				// 	taskTimeDate.setHours(0, 0, time*60);
+				// } else {
+				// 	taskTimeDate.setHours(0, time, 0);
+					
+				// }
+				// if ()
+			} else if (type==='seconds') {
+				// taskTimeDate.setHours(0, 0, time);
+				time=time*0.0001;
+				console.log(time, type);
+			}
+				var hours = Math.floor(time);
+				if (hours>=1) {
+					// console.log(time-hours, "t-h");
+					var minutes = (Math.floor(time-hours)*100);
+				} else {
+					var minutes = time*100;
+				}
+				console.log(minutes, "minutes here")
+				if (minutes>=1) {
+					var seconds = Math.ceil(((((time-hours)*100)-Math.floor(minutes))*100)*0.6);
+					console.log(minutes, "mins!", (time-hours)*100, "seconds!!")
+				} else {
+					var seconds = time*10000;
+				}
+				
+				// console.log(hours, "hours", minutes, "minutes", seconds, "seconds");
+				// minutes = Math.ceil(minutes*0.6);
+				// seconds = Math.ceil(seconds*0.6);
+				// console.log(hours, "hours", minutes, "minutes", seconds, "seconds");
+				taskTimeDate.setHours(hours, minutes, seconds);
 
-		$scope.stopTask = function(task) {
+			return minTwoDigits(taskTimeDate.getHours())+":"+minTwoDigits(taskTimeDate.getMinutes())+":"+minTwoDigits(taskTimeDate.getSeconds());
+		}
+
+
+
+		$scope.stopTask = function(task, type) {
 			startOk=0;
 			console.log(taskTime);
 			clearInterval(timer);
@@ -154,7 +207,7 @@ myApp.controller('TaskController',
 				    if (snapshot.exists()&&taskOrigTimeRefChangeLim<1&&$scope.taskList.length>1) {
 				    	oldName = snapshot.val()["name"];
 				    	oldTime = snapshot.val()["time"];
-				    	console.log(snapshot.val()["time"], "svt");
+				    	taskType = snapshot.val()["taskType"];
 				    	taskOrigTimeRefChangeLim+=1;
 				    	newTime = oldTime + (oldTime-taskTime)/($scope.taskList.length-1);
 				    }
@@ -167,10 +220,18 @@ myApp.controller('TaskController',
 			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
 			var tasksArray = $firebaseArray(tasksRef);
 
+			var newTimeDisplay = toTimeDisplay(newTime, type);
+
 			for (var t=0; t<$scope.taskList.length; t++) {
 				taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
-				taskRef.update({"time": newTime});
+				// need to display Newtime
+				if ($scope.taskList[t].$id!=task.$id) {
+					taskRef.update({"timeDisplay": newTimeDisplay});
+					taskRef.update({"time": newTime});
+				}
 			}
+
+			console.log(newTime, newTimeDisplay);
 
 			$scope.deleteTask(task);
 
