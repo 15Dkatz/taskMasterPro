@@ -130,7 +130,8 @@ myApp.controller('TaskController',
 			}
 			else if (time>3600) {
 				hours=Math.floor(time/3600);
-				minutes = Math.ceil((time-hours)/60);
+				// minutes = Math.ceil((time-hours)/60);
+				minutes = (time-(hours*3600))/60;
 				seconds=time%60;
 			}
 			console.log(seconds, "s", minutes, "m", hours, "h");
