@@ -29,36 +29,29 @@ myApp.controller('TaskController',
 
 				$scope.genTasks = function(tasks, time, type) {
 					$scope.logoutStatus = true;
+					switch(type) {
+						case ('seconds'):
+							time=time;
+							break;
+						case ('minutes'):
+							time*=60;
+							break;
+						case ('hours'):
+							time*=3600;
+							break;
+
+					}
 					console.log(tasks, time, type);
-					var setTime = Math.round((time/tasks)*100)/100;
+					var setTime = Math.ceil((time/tasks)*100)/100;
+
+					
+
 
 					var myTimeDate = new Date();
 					var myTimeDisplay = "";
 					currentTimeDate = new Date();
 
 					console.log(setTime, "setTime"); //not running??
-					// console.log(timeType.type, "type here!")
-					// if (type=='hours') {
-					// 	if (setTime<1) {
-					// 		myTimeDate.setHours(0, setTime*60, 0);
-					// 	} else {
-					// 		myTimeDate.setHours(setTime);
-							
-					// 	}
-					// 	// myTimeDisplay=minTwoDigits(myTimeDate.getHours())+":"+minTwoDigits(myTimeDate.getMinutes())+":"+minTwoDigits(myTimeDate.getSeconds());
-					// 	// 	console.log(myTimeDisplay, "myTimeDisplay");
-					// }
-					// else if (type==='minutes') {
-					// 	if (setTime<1) {
-					// 		myTimeDate.setHours(0, 0, setTime*60);
-					// 	} else {
-					// 		myTimeDate.setHours(setTime);
-							
-					// 	}
-					// } else {
-					// 	myTimeDate.setHours(0, 0, setTime)
-					// }
-					// myTimeDisplay=minTwoDigits(myTimeDate.getHours())+":"+minTwoDigits(myTimeDate.getMinutes())+":"+minTwoDigits(myTimeDate.getSeconds());
 					myTimeDisplay = toTimeDisplay(setTime, type);
 					console.log(myTimeDisplay, "myTimeDisplay");
 
@@ -93,44 +86,22 @@ myApp.controller('TaskController',
 
 		var currentTimeDate = new Date();
 
-		var addTime = function(task) {
-			console.log($scope.currentTime, "ct");
-			switch($scope.timeType["type"]) {
-				case('seconds'):
-					taskTime += 0.1;
-					break;
-				case('minutes'):
-					taskTime += 0.001666666667;
-					break;
-				case('hours'):
-					taskTime += 0.0002777777778;
-					break;
-			}
-			
-			console.log(taskTime, "tt");
-
-			if (taskTime<60) {
-				currentTimeDate.setHours(0, 0, taskTime);
-			}
-			else if (taskTime<360) {
-				currentTimeDate.setHours(0, taskTime, 0);
-			}
-			else {
-				currentTimeDate.setHours(taskTime, 0, 0);	
-			}
+		var addTime = function(task, type) {
+			console.log($scope.currentTime, "ct", type);
+			taskTime += 1;
 			$scope.$apply(function() {
-				$scope.currentTime=minTwoDigits(currentTimeDate.getHours())+":"+minTwoDigits(currentTimeDate.getMinutes())+":"+minTwoDigits(currentTimeDate.getSeconds());
+				$scope.currentTime=toTimeDisplay(taskTime, type);
 			});
 		}
 
 		var startOk = 0;
 
-		$scope.startTask = function(task) {
+		$scope.startTask = function(task, type) {
 			$scope.currentTime="00:00:00";
 			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 			taskRef.update({"showCurrent": true});
 			if (startOk<1) {
-				timer=setInterval(addTime, 100, task);
+				timer=setInterval(addTime, 1000, task, type);
 			}
 			startOk+=1; 
 
@@ -146,48 +117,25 @@ myApp.controller('TaskController',
 		var toTimeDisplay = function(time, type) {
 			console.log("converting!", time, "in", type);
 			var taskTimeDate = new Date();
-			// if (type===	'hours') {
-			// 	// if (time<1) {
-			// 	// 	taskTimeDate.setHours(0, Math.ceil(time*60), 0);
-			// 	// } else {
-			// 	// 	taskTimeDate.setHours(time);
-			// 	// }
-			// }
-			// else 
-			if (type==='minutes') {
-				time=time*0.01;
-				// if (time<1) {
-				// 	taskTimeDate.setHours(0, 0, time*60);
-				// } else {
-				// 	taskTimeDate.setHours(0, time, 0);
-					
-				// }
-				// if ()
-			} else if (type==='seconds') {
-				// taskTimeDate.setHours(0, 0, time);
-				time=time*0.0001;
-				console.log(time, type);
+			var hours=0;
+			var minutes=0;
+			var seconds=0;
+
+			if (time<60) {
+				seconds = time;
 			}
-				var hours = Math.floor(time);
-				if (hours>=1) {
-					// console.log(time-hours, "t-h");
-					var minutes = (Math.floor(time-hours)*100);
-				} else {
-					var minutes = time*100;
-				}
-				console.log(minutes, "minutes here")
-				if (minutes>=1) {
-					var seconds = Math.ceil(((((time-hours)*100)-Math.floor(minutes))*100)*0.6);
-					console.log(minutes, "mins!", (time-hours)*100, "seconds!!")
-				} else {
-					var seconds = time*10000;
-				}
-				
-				// console.log(hours, "hours", minutes, "minutes", seconds, "seconds");
-				// minutes = Math.ceil(minutes*0.6);
-				// seconds = Math.ceil(seconds*0.6);
-				// console.log(hours, "hours", minutes, "minutes", seconds, "seconds");
-				taskTimeDate.setHours(hours, minutes, seconds);
+			if (time>=60&&time<=3600) {
+				seconds = time%60;
+				minutes = Math.floor(time/60);
+			}
+			else if (time>3600) {
+				hours=Math.floor(time/3600);
+				minutes = Math.ceil((time-hours)/60);
+				seconds=time%60;
+			}
+			console.log(seconds, "s", minutes, "m", hours, "h");
+
+			taskTimeDate.setHours(hours, minutes, seconds);
 
 			return minTwoDigits(taskTimeDate.getHours())+":"+minTwoDigits(taskTimeDate.getMinutes())+":"+minTwoDigits(taskTimeDate.getSeconds());
 		}

@@ -27,7 +27,7 @@
         <div class="collection-item"><tr class=""><h5>&nbsp;&nbsp;&nbsp;Tasks to Complete</h5></tr></div>
         <tr ng-repeat="task in taskList" class="collection-item">
             <td><input type="text" placeholder="{{task.name}}" ng-model="taskName" id="taskName"  ng-keyup="$event.keyCode == 13 && renameTask(task, taskName)" class="left"></td>
-            <td><button ng-click="startTask(task)" class="btn waves-effect start_btn">
+            <td><button ng-click="startTask(task, task.type)" class="btn waves-effect start_btn">
                 Start Task<i class="material-icons right">play_arrow</i>
             </button></td>
             <td><button ng-click="stopTask(task, task.type)" class="btn waves-effect">
