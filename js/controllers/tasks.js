@@ -406,7 +406,7 @@ myApp.controller('TaskController',
 			}
 			console.log("sumTimeOfTasks", sumTimeOfTasks);
 
-			newTime = (sumTimeOfTasks)/($scope.taskList.length-1-numLocked);
+			newTime = (sumTimeOfTasks)/($scope.taskList.length-1-numLocked-1);
 			newTime = Math.round(newTime*100)/100;
 			newTime = zerofy(newTime);
 
@@ -417,21 +417,20 @@ myApp.controller('TaskController',
 			for (var t=0; t<$scope.taskList.length; t++) {
 				taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
 				var locked;
-					taskRef.once("value", function(snapshot) {
-						    if (snapshot.exists()) {
-						    	locked = snapshot.val()["locked"];
-						    }
-						}, function (errorObject) {
-						  console.log("The read failed: " + errorObject.code);
-					});
-					if (!locked) {
-						if ($scope.taskList[t].$id!=task.$id) {
-							taskRef.update({"timeDisplay": newTimeDisplay});
-							taskRef.update({"time": newTime});
-						}
-					} 
+				taskRef.once("value", function(snapshot) {
+					    if (snapshot.exists()) {
+					    	locked = snapshot.val()["locked"];
+					    }
+					}, function (errorObject) {
+					  console.log("The read failed: " + errorObject.code);
+				});
+				if (!locked) {
+					if ($scope.taskList[t].$id!=task.$id) {
+						taskRef.update({"timeDisplay": newTimeDisplay});
+						taskRef.update({"time": newTime});
+					}
+				} 
 			}
-
 			$scope.deleteTask(task);
 
 			updateTasklist();
