@@ -16,32 +16,26 @@
                             <label for={{type}}>{{type}}</label>
                         </li>
                     </ul>
-                <!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
                     <button ng-click="genTasks(tasks, time, timeType.type)" ng-disabled="myform.$invalid" class="btn waves-effect submit_btn">
                         Submit<i class="material-icons right">system_update_alt</i>
                     </button>
-                <!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
                     <button ng-disabled="myform.$invalid" class="btn waves-effect submit_btn" ng-click="genTasks(1, time, timeType.type)">
                         Quick Add<i class="material-icons right">add</i>
                     </button>
                 </div>
-                <!-- <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td> -->
             </div>
         </form>
 </div>
 
 <div class="collection">
-    <table class="highlight centered">
-        <div class="collection-item"><tr class=""><h5>&nbsp;&nbsp;&nbsp;Tasks to Complete</h5></tr></div>
+    <div class="collection-item"><h5>Tasks to Complete</h5></div>
+    <table class="highlight centered collection-item">
         <tr ng-repeat="task in taskList" class="collection-item">
             <td>&nbsp;</td>
             <td><input type="text" placeholder="{{task.name}}" ng-model="taskName" id="taskName"  ng-keyup="$event.keyCode == 13 && renameTask(task, taskName)" class="left renamer"></td>
             <td><span class="">
                 <span ng-if="!task.showCurrent">00:00:00</span>
-                <!-- <span ng-if="task.showCurrent && !task.showPaused">{{task.currentTime}}</span>
-                <span ng-if="task.showPaused">{{task.currentTime}} </span> -->
                 <span ng-if="task.showCurrent">{{task.currentTimeDisplay}}</span>
-                <!-- <span ng-if="task.showPaused">{{task.currentTime}} </span> -->
                 | {{task.timeDisplay}} </span>
           <!--       <button class="btn-floating btn-tiny waves-effect waves-light brown lighten-2" ng-click="addTimeToTask(task, timeType.type, 'positive')"><i class="material-icons">lock</i></button> -->
                 <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
@@ -84,11 +78,14 @@
                         <!-- </span> -->
                     </label>
                 </div>
-                <!-- </a> -->
             </td>
-                
         </tr> 
     </table>
+    <div class="collection-item">
+                <button ng-click="clearTasks()" class="btn">
+                    Clear<i class="material-icons right">delete_sweep</i>
+                </button> 
+    </div>
 </div>
 
 
@@ -100,12 +97,14 @@
     </li>
     <div class="collection-item">
         <button ng-click="clearDeletedTasks()" class="btn">
-            Clear Completed Tasks<i class="material-icons right">delete</i>
+            Clear<i class="material-icons right">delete_sweep</i>
         </button> 
     </div>
 </ul>
 
 <!-- make the lock button a picture to unlock and lock -->
+
+<!-- (i) information tab on top-right corner that explains what the application does -->
 
 
 <!-- if taskName already defined, add special styling to make black -->

@@ -22,8 +22,22 @@ myApp.controller('TaskController',
 	  		return (n < 10 ? '0' : '') + n;
 		}
 
+		var abs = function(n) {
+			if (n<1) {
+				n*=-1;
+			}
+			return n;
+		}
+
+		var zerofy = function(n) {
+			if (n<0) {
+				n=0;
+			}
+			return n;
+		}
+
+
 		var toTimeDisplay = function(time, type) {
-			// console.log("converting!", time, "in", type);
 			var taskTimeDate = new Date();
 			var hours=0;
 			var minutes=0;
@@ -68,11 +82,8 @@ myApp.controller('TaskController',
 							break;
 
 					}
-					// console.log(tasks, time, type);
+
 					var setTime = Math.ceil((time/tasks)*100)/100;
-
-					
-
 
 					var myTimeDate = new Date();
 					var myTimeDisplay = "";
@@ -160,8 +171,6 @@ myApp.controller('TaskController',
 		}
 
 
-
-
 		//timing
 		var timer;
 		var taskTime = 0;
@@ -187,9 +196,6 @@ myApp.controller('TaskController',
 
 			// important! setting the global taskTime to the current task's time
 			taskTime = contTime;
-			// if (time!=null) {
-			// 	taskTime = time;
-			// }
 			if (startOk<1) {
 				timer=setInterval(addTime, 1000, task, type, contTime);
 			}
@@ -197,7 +203,6 @@ myApp.controller('TaskController',
 
 		}
 
-		// var toggle = function()
 
 		$scope.pauseOrResumeTask = function(task, type, contTime) {
 
@@ -238,13 +243,7 @@ myApp.controller('TaskController',
 		}
 
 		// add more according to how long user holds button
-		var abs = function(n) {
-			if (n<1) {
-				n*=-1;
-			}
-			return n;
-		}
-
+		// ng-hold
 
 		$scope.addTimeToTask = function(task, type, sign) {
 			// console.log(type, "type in addTimeToTask function passed by tasks.html");
@@ -312,6 +311,13 @@ myApp.controller('TaskController',
 
 		}
 
+		$scope.clearTasks = function() {
+			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
+		    var record = $firebaseObject(tasksRef);
+		    record.$remove(tasksRef);
+			updateTasklist();
+
+		}
 
 		// stopping and deletion of tasks ********************************************************************************
 
@@ -320,12 +326,7 @@ myApp.controller('TaskController',
 		var taskType="";
 		var newTime=0;
 
-		var zerofy = function(n) {
-			if (n<0) {
-				n=0;
-			}
-			return n;
-		}
+		
 
 
 		$scope.stopTask = function(task, type) {
@@ -368,15 +369,46 @@ myApp.controller('TaskController',
 				numLockedRef.update({"numLocked": numLocked});
 			}
 
-			newTime = oldTime + (oldTime-taskTime)/(zerofy($scope.taskList.length-1-numLocked));
-			newTime = Math.round(newTime*100)/100;
-			newTime = zerofy(newTime);
-
 			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
 			var tasksArray = $firebaseArray(tasksRef);
 
+			
+
+			var sumTimeOfTasks = 0;
+
+			// take a sum of all the times that aren't locked
+			// apply that sum/($scope.taskList.length-numLocked) to each non-locked task.
+			for (var t=0; t<$scope.taskList.length; t++) {
+				taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
+				var locked;
+				taskRef.once("value", function(snapshot) {
+					    if (snapshot.exists()) {
+					    	locked = snapshot.val()["locked"];
+					    }
+					}, function (errorObject) {
+					  console.log("The read failed: " + errorObject.code);
+				});
+				if (!locked) {
+					taskRef.once("value", function(snapshot) {
+					    if (snapshot.exists()) {
+					    	var taskTime = snapshot.val()["time"];
+					    	var contTime = snapshot.val()["contTime"];
+					    	sumTimeOfTasks += (taskTime-contTime)
+					    }
+					}, function (errorObject) {
+					  console.log("The read failed: " + errorObject.code);
+					});
+				}
+			}
+			console.log("sumTimeOfTasks", sumTimeOfTasks);
+
+			newTime = (sumTimeOfTasks)/($scope.taskList.length-1-numLocked);
+			newTime = Math.round(newTime*100)/100;
+			newTime = zerofy(newTime);
+
 			var newTimeDisplay = toTimeDisplay(newTime, type);
 
+			console.log("newTime: ", newTime, "newTimeDisplay", newTimeDisplay);
 
 			for (var t=0; t<$scope.taskList.length; t++) {
 				taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
@@ -393,10 +425,9 @@ myApp.controller('TaskController',
 							taskRef.update({"timeDisplay": newTimeDisplay});
 							taskRef.update({"time": newTime});
 						}
-					}
+					} 
 			}
 
-// locks somewhat working, figure out why it glitches near the end
 			$scope.deleteTask(task);
 
 			updateTasklist();
@@ -457,6 +488,7 @@ myApp.controller('TaskController',
 }]);
 
 // ******************************************************************************************************************
+// ******************************************************************************************************************
 // Goals:
 
 // Path: /Users/davidkatz/Coding/webDev/15Dkatz/15Dkatz.github.io/projects/taskMaster
@@ -477,6 +509,7 @@ myApp.controller('TaskController',
 
 // Projects.
 
+// add total time passed/total Time next to Tasks to Complete
 
 // User Feedback:
 // e.g.v 
