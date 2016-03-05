@@ -320,6 +320,13 @@ myApp.controller('TaskController',
 		var taskType="";
 		var newTime=0;
 
+		var zerofy = function(n) {
+			if (n<0) {
+				n=0;
+			}
+			return n;
+		}
+
 
 		$scope.stopTask = function(task, type) {
 			startOk=0;
@@ -361,8 +368,9 @@ myApp.controller('TaskController',
 				numLockedRef.update({"numLocked": numLocked});
 			}
 
-			newTime = oldTime + (oldTime-taskTime)/($scope.taskList.length-1-numLocked);
+			newTime = oldTime + (oldTime-taskTime)/(zerofy($scope.taskList.length-1-numLocked));
 			newTime = Math.round(newTime*100)/100;
+			newTime = zerofy(newTime);
 
 			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
 			var tasksArray = $firebaseArray(tasksRef);
@@ -465,6 +473,7 @@ myApp.controller('TaskController',
 // Pause/Resume button [check]
 // Add and Subtract time for each task. [check]
 // Reset times? - Clear all button, that simply removes each task, but does not add thetime.
+// locks?
 
 // Projects.
 
