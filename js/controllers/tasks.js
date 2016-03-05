@@ -258,9 +258,9 @@ myApp.controller('TaskController',
 
 				if ($scope.taskList[t].$id!=task.$id) {
 					if (sign==="positive") {
-						indTime -= (timeToAdd/$scope.taskList.length);
+						indTime -= (timeToAdd/($scope.taskList.length-1));
 					} else {
-						indTime += (timeToAdd/$scope.taskList.length);
+						indTime += (timeToAdd/($scope.taskList.length-1));
 					}
 					indTime = abs(indTime);
 					taskRef.update({"time": indTime});

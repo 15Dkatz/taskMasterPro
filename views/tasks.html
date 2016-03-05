@@ -1,51 +1,77 @@
 
 <div class="collection"> 
-    <form ng-submit="genTasks(tasks, time, timeType.type)" novalidate> 
-        <div class="collection-item">
-            <input type="text" ng-model="tasks" placeholder="Number of tasks?" ng-required="true">
-        </div>
-        <div class="collection-item">
-            <input type="text" ng-model="time" placeholder="Total time for tasks?" ng-required="true">
-        </div>
-        <div class="collection-item">
-            <ul class="inline">
-                <li ng-repeat="type in timeTypes" class="inline">
-                    <input type="radio" ng-model="timeType.type" ng-value="type" name="type" id="{{type}}" class="inline">
-                    <label for={{type}}>{{type}}</label>
-                </li>
-            </ul>
-            <button type="submit" ng-disabled="myform.$invalid" class="btn waves-effect submit_btn">
-                Submit<i class="material-icons right">system_update_alt</i>
-            </button>
-        </div>
-    </form>
+        <form ng-submit="genTasks(tasks, time, timeType.type)" novalidate> 
+            <div class="collection-item">
+                <input type="text" ng-model="tasks" placeholder="Number of tasks?" ng-required="true">
+            </div>
+            <div class="collection-item">
+                <input type="text" ng-model="time" placeholder="Total time for tasks?" ng-required="true">
+            </div>
+            <div class="collection-item">
+                <div>&nbsp;</div>
+                <div>
+                    <ul class="inline">
+                        <li ng-repeat="type in timeTypes" class="inline">
+                            <input type="radio" ng-model="timeType.type" ng-value="type" name="type" id="{{type}}" class="inline">
+                            <label for={{type}}>{{type}}</label>
+                        </li>
+                    </ul>
+                <!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
+                    <button type="submit" ng-disabled="myform.$invalid" class="btn waves-effect submit_btn">
+                        Submit<i class="material-icons right">system_update_alt</i>
+                    </button>
+                <!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
+                    <button ng-disabled="myform.$invalid" class="btn waves-effect submit_btn" ng-click="genTasks(1, time, timeType.type)">
+                        Quick Add<i class="material-icons right">add</i>
+                    </button>
+                </div>
+                <!-- <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td> -->
+            </div>
+        </form>
 </div>
 
 <div class="collection">
     <table class="highlight centered">
         <div class="collection-item"><tr class=""><h5>&nbsp;&nbsp;&nbsp;Tasks to Complete</h5></tr></div>
         <tr ng-repeat="task in taskList" class="collection-item">
+            <td>&nbsp;</td>
             <td><input type="text" placeholder="{{task.name}}" ng-model="taskName" id="taskName"  ng-keyup="$event.keyCode == 13 && renameTask(task, taskName)" class="left renamer"></td>
-            <td ng-if="!task.showPaused"><button ng-click="startTask(task, task.type, task.contTime)" class="btn waves-effect start_btn" >
-                Start<i class="material-icons right">play_arrow</i>
-            </button></td>
-            <td ng-if="task.showPaused"><button ng-click="pauseOrResumeTask(task, task.type, task.contTime)" class="btn waves-effect start_btn">
-                {{task.buttonLabel}}<i class="material-icons right">{{task.pauseIcon}}</i>
-            </button></td>
-            <td><button ng-click="stopTask(task, task.type)" class="btn waves-effect">
-                Complete<i class="material-icons right">done</i>
-            </button></td>
             <td><span class="">
-                    <span ng-if="!task.showCurrent">00:00:00</span>
-                    <!-- <span ng-if="task.showCurrent && !task.showPaused">{{task.currentTime}}</span>
-                    <span ng-if="task.showPaused">{{task.currentTime}} </span> -->
-                    <span ng-if="task.showCurrent">{{task.currentTimeDisplay}}</span>
-                    <!-- <span ng-if="task.showPaused">{{task.currentTime}} </span> -->
+                <span ng-if="!task.showCurrent">00:00:00</span>
+                <!-- <span ng-if="task.showCurrent && !task.showPaused">{{task.currentTime}}</span>
+                <span ng-if="task.showPaused">{{task.currentTime}} </span> -->
+                <span ng-if="task.showCurrent">{{task.currentTimeDisplay}}</span>
+                <!-- <span ng-if="task.showPaused">{{task.currentTime}} </span> -->
                 | {{task.timeDisplay}} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                 <button class="btn-floating btn-tiny waves-effect waves-light brown lighten-2" ng-click="addTimeToTask(task, timeType.type, 'positive')"><i class="material-icons">add</i></button>
                 <button class="btn-floating btn-small waves-effect waves-light brown lighten-2" ng-click="addTimeToTask(task, timeType.type, 'negative')"><i class="material-icons">remove</i></button>
             </td>
-                
+            <td ng-if="!task.showPaused"><button ng-click="startTask(task, task.type, task.contTime)" class="btn waves-effect start_btn" >
+                Start<i class="material-icons right">play_arrow</i>
+            </button>
+            </td>
+            <td ng-if="task.showPaused">
+                <button ng-click="pauseOrResumeTask(task, task.type, task.contTime)" class="btn waves-effect start_btn">
+                    {{task.buttonLabel}}<i class="material-icons right">{{task.pauseIcon}}</i>
+                </button>
+            </td>
+            <td>
+
+                <button ng-click="stopTask(task, task.type)" class="btn waves-effect">
+                Complete<i class="material-icons right"></i>
+                </button>
+            </td>
+            <!-- <td>
+                <div class="switch">
+                    <label>
+                        Unlocked
+                        <input type="checkbox">
+                        <span class="lever"></span>
+                        Locked
+                    </label>
+                </div>
+            </td>
+ -->                
         </tr> 
     </table>
 </div>
@@ -63,6 +89,8 @@
         </button> 
     </div>
 </ul>
+
+<!-- make the lock button a picture to unlock and lock -->
 
 
 <!-- if taskName already defined, add special styling to make black -->
