@@ -22,6 +22,33 @@ myApp.controller('TaskController',
 	  		return (n < 10 ? '0' : '') + n;
 		}
 
+		var toTimeDisplay = function(time, type) {
+			// console.log("converting!", time, "in", type);
+			var taskTimeDate = new Date();
+			var hours=0;
+			var minutes=0;
+			var seconds=0;
+
+			if (time<60) {
+				seconds = time;
+			}
+			if (time>=60&&time<=3600) {
+				seconds = time%60;
+				minutes = Math.floor(time/60);
+			}
+			else if (time>3600) {
+				hours=Math.floor(time/3600);
+				// minutes = Math.ceil((time-hours)/60);
+				minutes = (time-(hours*3600))/60;
+				seconds=time%60;
+			}
+			// console.log(seconds, "s", minutes, "m", hours, "h");
+
+			taskTimeDate.setHours(hours, minutes, seconds);
+
+			return minTwoDigits(taskTimeDate.getHours())+":"+minTwoDigits(taskTimeDate.getMinutes())+":"+minTwoDigits(taskTimeDate.getSeconds());
+		}
+
 		auth.$onAuth(function(authUser) {
 			if (authUser) {
 				updateTasklist();
@@ -41,7 +68,7 @@ myApp.controller('TaskController',
 							break;
 
 					}
-					console.log(tasks, time, type);
+					// console.log(tasks, time, type);
 					var setTime = Math.ceil((time/tasks)*100)/100;
 
 					
@@ -51,18 +78,23 @@ myApp.controller('TaskController',
 					var myTimeDisplay = "";
 					currentTimeDate = new Date();
 
-					console.log(setTime, "setTime"); //not running??
+					// console.log(setTime, "setTime"); 
 					myTimeDisplay = toTimeDisplay(setTime, type);
-					console.log(myTimeDisplay, "myTimeDisplay");
+					// console.log(myTimeDisplay, "myTimeDisplay");
 
 					for (var t=0; t<tasks; t++) {
 					var taskData = {
 						name: "task" + String(t+1), 
 						time: setTime,
-						currentTime: 0,
 						showCurrent: false,
 						type: type,
-						timeDisplay: myTimeDisplay
+						timeDisplay: myTimeDisplay,
+						currentTimeDisplay: "00:00:00",
+						buttonLabel: "pause",
+						showPaused: false,
+						Paused: false,
+						pauseIcon: "pause",
+						contTime: 0
 					}
 					tasksInfo.$add(taskData);
 
@@ -76,35 +108,97 @@ myApp.controller('TaskController',
 			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 			// taskRef.set({name: taskName, time: time/tasks});
 			taskRef.update({"name": taskName});
-			console.log(taskRef + "   " + taskName);
+			// console.log(taskRef + "   " + taskName);
 		}
 
 		//timing
 		var timer;
 		var taskTime = 0;
-		$scope.currentTime = "00:00:00";
+		// $scope.currentTime = "00:00:00";
 
 		var currentTimeDate = new Date();
 
-		var addTime = function(task, type) {
-			console.log($scope.currentTime, "ct", type);
+		var addTime = function(task, type, contTime) {
+			// need to define time here...
+
+			// add according to time
+			// if (contTime!=undefined) {
+			// 	taskTime=contTime;
+			// }
+			// console.log(contTime, "time");
+
+			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
+			// console.log($scope.currentTime, "ct", type);
 			taskTime += 1;
+
+			// if time defined, then add according to that time!
+
 			$scope.$apply(function() {
-				$scope.currentTime=toTimeDisplay(taskTime, type);
+				// $scope.currentTime=toTimeDisplay(taskTime, type);
+				console.log(taskTime, "changing Display", type);
+				taskRef.update({"contTime": taskTime})
+				taskRef.update({"currentTimeDisplay": toTimeDisplay(taskTime, type)});
 			});
 		}
 
 		var startOk = 0;
 
-		$scope.startTask = function(task, type) {
-			$scope.currentTime="00:00:00";
+		$scope.startTask = function(task, type, contTime) {
+			// $scope.currentTime="00:00:00";
 			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 			taskRef.update({"showCurrent": true});
+			taskRef.update({"showPaused": true});
+
+			// important! setting the global taskTime to the current task's time
+			taskTime = contTime;
+			// if (time!=null) {
+			// 	taskTime = time;
+			// }
 			if (startOk<1) {
-				timer=setInterval(addTime, 1000, task, type);
+				timer=setInterval(addTime, 1000, task, type, contTime);
 			}
 			startOk+=1; 
 
+		}
+
+		// var toggle = function()
+
+		$scope.pauseOrResumeTask = function(task, type, contTime) {
+
+			clearInterval(timer);
+			var paused=false;
+			var contTime;
+
+			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);;
+			taskRef.update({"buttonLabel": "resume task"});
+			taskRef.update({"pauseIcon": "play_arrow"});
+			// taskRef.update({"contTime": taskTime});
+			
+			startOk = 0;
+
+			taskRef.on("value", function(snapshot) {
+				    if (snapshot.exists()) {
+				    	paused = snapshot.val()["Paused"];
+				    	contTime = snapshot.val()["contTime"]; 
+				    	// console.log(contTime, "contTime!");
+				    }
+				    
+				}, function (errorObject) {
+				  console.log("The read failed: " + errorObject.code);
+			});
+
+			taskRef.update({"Paused": !paused});
+
+			// important! setting the global taskTime to the current task's time
+			taskTime = contTime;
+
+			if (!paused) {
+				//doesn't update quickly... alternate solution?
+				taskRef.update({"buttonLabel": "pause task"})
+				taskRef.update({"pauseIcon": "pause"})
+				$scope.startTask(task, type, contTime);
+				
+			}
 		}
 
 		var oldName="blankTask";
@@ -114,35 +208,6 @@ myApp.controller('TaskController',
 
 
 		// stopping and deletion of tasks ********************************************************************************
-		var toTimeDisplay = function(time, type) {
-			console.log("converting!", time, "in", type);
-			var taskTimeDate = new Date();
-			var hours=0;
-			var minutes=0;
-			var seconds=0;
-
-			if (time<60) {
-				seconds = time;
-			}
-			if (time>=60&&time<=3600) {
-				seconds = time%60;
-				minutes = Math.floor(time/60);
-			}
-			else if (time>3600) {
-				hours=Math.floor(time/3600);
-				// minutes = Math.ceil((time-hours)/60);
-				minutes = (time-(hours*3600))/60;
-				seconds=time%60;
-			}
-			console.log(seconds, "s", minutes, "m", hours, "h");
-
-			taskTimeDate.setHours(hours, minutes, seconds);
-
-			return minTwoDigits(taskTimeDate.getHours())+":"+minTwoDigits(taskTimeDate.getMinutes())+":"+minTwoDigits(taskTimeDate.getSeconds());
-		}
-
-
-
 		$scope.stopTask = function(task, type) {
 			startOk=0;
 			console.log(taskTime);
@@ -163,7 +228,6 @@ myApp.controller('TaskController',
 				}, function (errorObject) {
 				  console.log("The read failed: " + errorObject.code);
 			});
-			// Math.floor10(55.59, -1);
 			newTime = Math.round(newTime*100)/100;
 
 			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
@@ -173,20 +237,17 @@ myApp.controller('TaskController',
 
 			for (var t=0; t<$scope.taskList.length; t++) {
 				taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
-				// need to display Newtime
+
 				if ($scope.taskList[t].$id!=task.$id) {
 					taskRef.update({"timeDisplay": newTimeDisplay});
 					taskRef.update({"time": newTime});
 				}
 			}
 
-			console.log(newTime, newTimeDisplay);
-
 			$scope.deleteTask(task);
 
 			updateTasklist();
 			taskTime = 0;
-
 		}
 
 
@@ -212,21 +273,17 @@ myApp.controller('TaskController',
   			if (time==null) {
   				time=0;
   			}
-  			// if (currentTime==null) {
-  			// 	currentTime=0;
-  			// }
+
   			return {
   				name: task,
-  				currentTime: $scope.currentTime,
-  				timeDisplay: time
-  				
+  				timeDisplay: time				
   			}
   		}
 
 		$scope.deleteTask = function(task) {
 			var taskRefDel = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 			var taskDel = $firebaseObject(taskRefDel);
-			console.log(task.timeDisplay, "td");
+			// console.log(task.timeDisplay, "td");
 			addDelTasks(constructTaskData(oldName, task.timeDisplay));
 
 			taskDel.$remove(task.$id);
@@ -261,6 +318,15 @@ myApp.controller('TaskController',
 
 // limit the display to two decimal places for time.
 // convert hours to minutes, hours, minutes, seconds, 00:15
+
+
+// Mom's input:
+// Pause/Resume button [check]
+// Add and Subtract time for each task.
+// Reset times? - Clear all button, that simply removes each task, but does not add thetime.
+
+// Projects.
+
 
 // User Feedback:
 // e.g.v 
