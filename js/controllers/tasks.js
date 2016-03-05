@@ -118,6 +118,22 @@ myApp.controller('TaskController',
 					tasksInfo.$add(taskData);
 
 				}
+
+				var numLockedRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/numLocked');
+				var numLocked;
+				numLockedRef.once("value", function(snapshot) {
+					    if (snapshot.exists()) {
+					    	numLocked = snapshot.val()["numLocked"];
+					    }
+					}, function (errorObject) {
+					  console.log("The read failed: " + errorObject.code);
+				});
+
+
+				if (numLocked===undefined) {
+					numLockedRef.set({"numLocked": 0});
+				} 
+
 					$scope.taskList = tasksInfo;
 				} 
 			} //userAuthenticated
@@ -130,6 +146,39 @@ myApp.controller('TaskController',
 			// console.log(taskRef + "   " + taskName);
 		}
 
+		var numLocked=0;
+		$scope.updateNumLocked = function() {
+			var numLockedRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/numLocked');
+			numLocked = 0;	
+
+
+			for (var t=0; t<$scope.taskList.length; t++) {
+				taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
+				var locked;
+				taskRef.once("value", function(snapshot) {
+					    if (snapshot.exists()) {
+					    	locked = snapshot.val()["locked"];
+					    }
+					}, function (errorObject) {
+					  console.log("The read failed: " + errorObject.code);
+				});
+				if (locked) {
+					// if ($scope.taskList[t].$id!=task.$id) {
+					// 	taskRef.update({"timeDisplay": newTimeDisplay});
+					// 	taskRef.update({"time": newTime});
+					// }
+					numLocked+=1;
+				} 
+			}
+
+			numLockedRef.set({"numLocked": numLocked});
+
+
+
+			console.log("updated numLocked to", numLocked);
+
+
+		}
 
 
 		$scope.lockTask = function(task) {
@@ -150,30 +199,31 @@ myApp.controller('TaskController',
 
 			taskRef.update({"locked": lockStatus});
 			// keep track of how many locked
-			var numLockedRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/numLocked');
-			var numLocked;
-			numLockedRef.once("value", function(snapshot) {
-				    if (snapshot.exists()) {
-				    	numLocked = snapshot.val()["numLocked"];
-				    }
-				}, function (errorObject) {
-				  console.log("The read failed: " + errorObject.code);
-			});
+			// var numLockedRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/numLocked');
+			// var numLocked;
+			// numLockedRef.once("value", function(snapshot) {
+			// 	    if (snapshot.exists()) {
+			// 	    	numLocked = snapshot.val()["numLocked"];
+			// 	    }
+			// 	}, function (errorObject) {
+			// 	  console.log("The read failed: " + errorObject.code);
+			// });
 
 
-			if (numLocked===undefined) {
-				numLockedRef.set({"numLocked": 1});
-			} else {
-				if (lockStatus) {
-					numLocked += 1;
-					// taskRef.update({"locked": false});
-				} else {
-					numLocked -= 1;
-					// taskRef.update({"locked": true});
-				}
-				numLockedRef.update({"numLocked": numLocked});
-			}
-			
+			// if (numLocked===undefined) {
+			// 	numLockedRef.set({"numLocked": 1});
+			// } else {
+			// 	if (lockStatus) {
+			// 		numLocked += 1;
+			// 		// taskRef.update({"locked": false});
+			// 	} else {
+			// 		numLocked -= 1;
+			// 		// taskRef.update({"locked": true});
+			// 	}
+			// 	numLockedRef.update({"numLocked": numLocked});
+			// }
+			$scope.updateNumLocked();
+
 		}
 
 
@@ -320,7 +370,7 @@ myApp.controller('TaskController',
 		    var record = $firebaseObject(tasksRef);
 		    record.$remove(tasksRef);
 			updateTasklist();
-
+			$scope.updateNumLocked();
 		}
 
 		// stopping and deletion of tasks ********************************************************************************
@@ -343,7 +393,7 @@ myApp.controller('TaskController',
 			newTime=0;
 
 			var locked;
-			var numLocked;
+			// var numLocked;
 
 			taskOrigTimeRef.once("value", function(snapshot) {
 				    if (snapshot.exists()&&taskOrigTimeRefChangeLim<1&&$scope.taskList.length>1) {
@@ -359,19 +409,7 @@ myApp.controller('TaskController',
 				  console.log("The read failed: " + errorObject.code);
 			});
 
-			var numLockedRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/numLocked');
-			numLockedRef.once("value", function(snapshot) {
-				    if (snapshot.exists()) {
-				    	numLocked = snapshot.val()["numLocked"]-1;
-				    }
-				}, function (errorObject) {
-				  console.log("The read failed: " + errorObject.code);
-			});
-
-			// if task is locked, subtract from the locked total
-			if (locked) {
-				numLockedRef.update({"numLocked": numLocked});
-			}
+			$scope.updateNumLocked();
 
 			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
 			var tasksArray = $firebaseArray(tasksRef);
@@ -380,8 +418,6 @@ myApp.controller('TaskController',
 
 			var sumTimeOfTasks = 0;
 
-			// take a sum of all the times that aren't locked
-			// apply that sum/($scope.taskList.length-numLocked) to each non-locked task.
 			for (var t=0; t<$scope.taskList.length; t++) {
 				taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
 				var locked;
@@ -406,7 +442,9 @@ myApp.controller('TaskController',
 			}
 			console.log("sumTimeOfTasks", sumTimeOfTasks);
 
-			newTime = (sumTimeOfTasks)/($scope.taskList.length-1-numLocked-1);
+			console.log("numLocked: ", numLocked);
+
+			newTime = (sumTimeOfTasks)/($scope.taskList.length-1-numLocked);
 			newTime = Math.round(newTime*100)/100;
 			newTime = zerofy(newTime);
 
