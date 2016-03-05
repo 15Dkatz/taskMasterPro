@@ -163,10 +163,6 @@ myApp.controller('TaskController',
 					  console.log("The read failed: " + errorObject.code);
 				});
 				if (locked) {
-					// if ($scope.taskList[t].$id!=task.$id) {
-					// 	taskRef.update({"timeDisplay": newTimeDisplay});
-					// 	taskRef.update({"time": newTime});
-					// }
 					numLocked+=1;
 				} 
 			}
@@ -198,30 +194,6 @@ myApp.controller('TaskController',
 			console.log("lockStatus should change each time:", lockStatus);
 
 			taskRef.update({"locked": lockStatus});
-			// keep track of how many locked
-			// var numLockedRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/numLocked');
-			// var numLocked;
-			// numLockedRef.once("value", function(snapshot) {
-			// 	    if (snapshot.exists()) {
-			// 	    	numLocked = snapshot.val()["numLocked"];
-			// 	    }
-			// 	}, function (errorObject) {
-			// 	  console.log("The read failed: " + errorObject.code);
-			// });
-
-
-			// if (numLocked===undefined) {
-			// 	numLockedRef.set({"numLocked": 1});
-			// } else {
-			// 	if (lockStatus) {
-			// 		numLocked += 1;
-			// 		// taskRef.update({"locked": false});
-			// 	} else {
-			// 		numLocked -= 1;
-			// 		// taskRef.update({"locked": true});
-			// 	}
-			// 	numLockedRef.update({"numLocked": numLocked});
-			// }
 			$scope.updateNumLocked();
 
 		}
@@ -373,15 +345,11 @@ myApp.controller('TaskController',
 			$scope.updateNumLocked();
 		}
 
-		// stopping and deletion of tasks ********************************************************************************
 
 		var oldName="blankTask";
 		var oldTime=0;
 		var taskType="";
 		var newTime=0;
-
-		
-
 
 		$scope.stopTask = function(task, type) {
 			startOk=0;
@@ -440,14 +408,11 @@ myApp.controller('TaskController',
 					});
 				}
 			}
-			console.log("sumTimeOfTasks", sumTimeOfTasks);
+			var dividend = $scope.taskList.length-1-numLocked
 
-			console.log("numLocked: ", numLocked);
-
-			newTime = (sumTimeOfTasks)/($scope.taskList.length-1-numLocked);
+			newTime = (sumTimeOfTasks)/dividend;
 			newTime = Math.round(newTime*100)/100;
 			newTime = zerofy(newTime);
-
 			var newTimeDisplay = toTimeDisplay(newTime, type);
 
 			console.log("newTime: ", newTime, "newTimeDisplay", newTimeDisplay);
@@ -462,13 +427,14 @@ myApp.controller('TaskController',
 					}, function (errorObject) {
 					  console.log("The read failed: " + errorObject.code);
 				});
-				if (!locked) {
+				if (!locked&&isFinite(newTime)) {
 					if ($scope.taskList[t].$id!=task.$id) {
 						taskRef.update({"timeDisplay": newTimeDisplay});
 						taskRef.update({"time": newTime});
 					}
 				} 
 			}
+
 			$scope.deleteTask(task);
 
 			updateTasklist();
@@ -492,10 +458,10 @@ myApp.controller('TaskController',
 
 
 		var constructTaskData = function(task, currentTimeDisplay, time) {
-  			if (task==null) {
+  			if (task===undefined) {
   				name="blankTask";
   			}
-  			if (time==null) {
+  			if (time===NaN) {
   				time=0;
   			}
 
