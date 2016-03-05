@@ -202,6 +202,12 @@ myApp.controller('TaskController',
 		}
 
 		// add more according to how long user holds button
+		var abs = function(n) {
+			if (n<1) {
+				n*=-1;
+			}
+			return n;
+		}
 
 
 		$scope.addTimeToTask = function(task, type, sign) {
@@ -234,10 +240,15 @@ myApp.controller('TaskController',
 				time-=timeToAdd;
 			}
 			
+			time = abs(time);
+
+
 			for (var t=0; t<$scope.taskList.length; t++) {
 				taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
 				var indTime;
-				taskRef.on("value", function(snapshot) {
+
+				console.log(indTime);
+				taskRef.once("value", function(snapshot) {
 					    if (snapshot.exists()) {
 					    	indTime = snapshot.val()["time"];
 					    }
@@ -251,6 +262,7 @@ myApp.controller('TaskController',
 					} else {
 						indTime += (timeToAdd/$scope.taskList.length);
 					}
+					indTime = abs(indTime);
 					taskRef.update({"time": indTime});
 					taskRef.update({"timeDisplay": toTimeDisplay(indTime)});
 				} else {
@@ -380,13 +392,10 @@ myApp.controller('TaskController',
 
 // Ideas:
 
-// limit the display to two decimal places for time.
-// convert hours to minutes, hours, minutes, seconds, 00:15
-
 
 // Mom's input:
 // Pause/Resume button [check]
-// Add and Subtract time for each task.
+// Add and Subtract time for each task. [check]
 // Reset times? - Clear all button, that simply removes each task, but does not add thetime.
 
 // Projects.
