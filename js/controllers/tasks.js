@@ -36,6 +36,12 @@ myApp.controller('TaskController',
 			return n;
 		}
 
+		$scope.informationStatus = false;
+
+		$scope.toggleInformation = function() {
+		    $scope.informationStatus = !$scope.informationStatus;
+		    console.log($scope.informationStatus);
+		}
 
 		var toTimeDisplay = function(time, type) {
 			var taskTimeDate = new Date();
@@ -103,7 +109,7 @@ myApp.controller('TaskController',
 						currentTimeDisplay: "00:00:00",
 						buttonLabel: "pause",
 						showPaused: false,
-						Paused: false,
+						paused: false,
 						pauseIcon: "pause",
 						contTime: 0,
 						locked: false,
@@ -156,7 +162,7 @@ myApp.controller('TaskController',
 
 
 			if (numLocked===undefined) {
-				numLockedRef.set({"numLocked": 0});
+				numLockedRef.set({"numLocked": 1});
 			} else {
 				if (lockStatus) {
 					numLocked += 1;
@@ -207,7 +213,7 @@ myApp.controller('TaskController',
 		$scope.pauseOrResumeTask = function(task, type, contTime) {
 
 			clearInterval(timer);
-			var paused=false;
+			var paused;
 			var contTime;
 
 			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
@@ -219,7 +225,7 @@ myApp.controller('TaskController',
 
 			taskRef.on("value", function(snapshot) {
 				    if (snapshot.exists()) {
-				    	paused = snapshot.val()["Paused"];
+				    	paused = snapshot.val()["paused"];
 				    	contTime = snapshot.val()["contTime"]; 
 				    	// console.log(contTime, "contTime!");
 				    }
@@ -228,7 +234,7 @@ myApp.controller('TaskController',
 				  console.log("The read failed: " + errorObject.code);
 			});
 
-			taskRef.update({"Paused": !paused});
+			taskRef.update({"paused": !paused});
 
 			// important! setting the global taskTime to the current task's time
 			taskTime = contTime;
@@ -246,8 +252,6 @@ myApp.controller('TaskController',
 		// ng-hold
 
 		$scope.addTimeToTask = function(task, type, sign) {
-			// console.log(type, "type in addTimeToTask function passed by tasks.html");
-			// add one to this task, update
 			var contTime;
 			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
 			var taskOrigRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);

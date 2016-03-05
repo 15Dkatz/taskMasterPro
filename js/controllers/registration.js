@@ -1,3 +1,8 @@
+$(document).ready(function() {
+  $(".dropdown-button").dropdown();
+})
+
+
 myApp.controller('RegistrationController',
   ['$scope', 'Authentication',
   function($scope, Authentication) {
@@ -13,5 +18,9 @@ myApp.controller('RegistrationController',
   $scope.register = function() {
     Authentication.register($scope.user);
   }; // register
+
+
+  
+
 
 }]); // Controller
