@@ -46,11 +46,13 @@ myApp.factory('Authentication',
 
         var regRef = new Firebase(FIREBASE_URL + 'users')
         .child(regUser.uid).set({
+          // numLocked: 0,
           date: Firebase.ServerValue.TIMESTAMP,
           regUser: regUser.uid,
           firstname: user.firstname,
           lastname: user.lastname,
-          email:  user.email
+          email:  user.email,
+          // numLocked: 0
         }); //user info
 
         myObject.login(user);

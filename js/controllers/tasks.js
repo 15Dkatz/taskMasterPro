@@ -76,7 +76,7 @@ myApp.controller('TaskController',
 
 					var myTimeDate = new Date();
 					var myTimeDisplay = "";
-					currentTimeDate = new Date();
+					// currentTimeDate = new Date();
 
 					// console.log(setTime, "setTime"); 
 					myTimeDisplay = toTimeDisplay(setTime, type);
@@ -94,7 +94,9 @@ myApp.controller('TaskController',
 						showPaused: false,
 						Paused: false,
 						pauseIcon: "pause",
-						contTime: 0
+						contTime: 0,
+						locked: false,
+						checked: "checked"
 					}
 					tasksInfo.$add(taskData);
 
@@ -111,30 +113,64 @@ myApp.controller('TaskController',
 			// console.log(taskRef + "   " + taskName);
 		}
 
+
+
+		$scope.lockTask = function(task) {
+			taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
+			var lockStatus;
+
+			// console.log(indTime);
+			taskRef.once("value", function(snapshot) {
+				    if (snapshot.exists()) {
+				    	lockStatus = snapshot.val()["locked"];
+				    }
+				}, function (errorObject) {
+				  console.log("The read failed: " + errorObject.code);
+			});
+
+			lockStatus = !lockStatus;
+			console.log("lockStatus should change each time:", lockStatus);
+
+			taskRef.update({"locked": lockStatus});
+			// keep track of how many locked
+			var numLockedRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/numLocked');
+			var numLocked;
+			numLockedRef.once("value", function(snapshot) {
+				    if (snapshot.exists()) {
+				    	numLocked = snapshot.val()["numLocked"];
+				    }
+				}, function (errorObject) {
+				  console.log("The read failed: " + errorObject.code);
+			});
+
+
+			if (numLocked===undefined) {
+				numLockedRef.set({"numLocked": 0});
+			} else {
+				if (lockStatus) {
+					numLocked += 1;
+					// taskRef.update({"locked": false});
+				} else {
+					numLocked -= 1;
+					// taskRef.update({"locked": true});
+				}
+				numLockedRef.update({"numLocked": numLocked});
+			}
+			
+		}
+
+
+
+
 		//timing
 		var timer;
 		var taskTime = 0;
-		// $scope.currentTime = "00:00:00";
-
-		var currentTimeDate = new Date();
 
 		var addTime = function(task, type, contTime) {
-			// need to define time here...
-
-			// add according to time
-			// if (contTime!=undefined) {
-			// 	taskTime=contTime;
-			// }
-			// console.log(contTime, "time");
 
 			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
-			// console.log($scope.currentTime, "ct", type);
 			taskTime += 1;
-
-			// if time defined, then add according to that time!
-
 			$scope.$apply(function() {
-				// $scope.currentTime=toTimeDisplay(taskTime, type);
 				console.log(taskTime, "changing Display", type);
 				taskRef.update({"contTime": taskTime})
 				taskRef.update({"currentTimeDisplay": toTimeDisplay(taskTime, type)});
@@ -294,17 +330,38 @@ myApp.controller('TaskController',
 			var taskOrigTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 			newTime=0;
 
-			taskOrigTimeRef.on("value", function(snapshot) {
+			var locked;
+			var numLocked;
+
+			taskOrigTimeRef.once("value", function(snapshot) {
 				    if (snapshot.exists()&&taskOrigTimeRefChangeLim<1&&$scope.taskList.length>1) {
 				    	oldName = snapshot.val()["name"];
 				    	oldTime = snapshot.val()["time"];
 				    	taskType = snapshot.val()["taskType"];
+				    	locked = snapshot.val()["locked"];
+
 				    	taskOrigTimeRefChangeLim+=1;
-				    	newTime = oldTime + (oldTime-taskTime)/($scope.taskList.length-1);
+
 				    }
 				}, function (errorObject) {
 				  console.log("The read failed: " + errorObject.code);
 			});
+
+			var numLockedRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/numLocked');
+			numLockedRef.once("value", function(snapshot) {
+				    if (snapshot.exists()) {
+				    	numLocked = snapshot.val()["numLocked"]-1;
+				    }
+				}, function (errorObject) {
+				  console.log("The read failed: " + errorObject.code);
+			});
+
+			// if task is locked, subtract from the locked total
+			if (locked) {
+				numLockedRef.update({"numLocked": numLocked});
+			}
+
+			newTime = oldTime + (oldTime-taskTime)/($scope.taskList.length-1-numLocked);
 			newTime = Math.round(newTime*100)/100;
 
 			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
@@ -312,15 +369,26 @@ myApp.controller('TaskController',
 
 			var newTimeDisplay = toTimeDisplay(newTime, type);
 
+
 			for (var t=0; t<$scope.taskList.length; t++) {
 				taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
-
-				if ($scope.taskList[t].$id!=task.$id) {
-					taskRef.update({"timeDisplay": newTimeDisplay});
-					taskRef.update({"time": newTime});
-				}
+				var locked;
+					taskRef.once("value", function(snapshot) {
+						    if (snapshot.exists()) {
+						    	locked = snapshot.val()["locked"];
+						    }
+						}, function (errorObject) {
+						  console.log("The read failed: " + errorObject.code);
+					});
+					if (!locked) {
+						if ($scope.taskList[t].$id!=task.$id) {
+							taskRef.update({"timeDisplay": newTimeDisplay});
+							taskRef.update({"time": newTime});
+						}
+					}
 			}
 
+// locks somewhat working, figure out why it glitches near the end
 			$scope.deleteTask(task);
 
 			updateTasklist();
