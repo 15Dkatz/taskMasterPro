@@ -1,7 +1,3 @@
-/*html {
-	text-align: center;
-}
-*/
 #taskName {
 	color: #000;
 	font-style: bold;
@@ -14,9 +10,6 @@
 	/*width: 200px;*/
 }
 
-/*li {
-	display: inline;
-}*/
 
 .submit_btn  {
 	margin-left: 5%;
@@ -26,9 +19,6 @@
 	margin-left: 10%;
 }
 
-/*nav {
-    @extend .blue-text, .text-lighten-4;
- }*/
-/* nav {
- 	background: green darken-1;
- }*/
+.renamer::-webkit-input-placeholder {
+   color: #000;
+}

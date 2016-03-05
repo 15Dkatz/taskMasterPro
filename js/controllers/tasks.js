@@ -169,8 +169,8 @@ myApp.controller('TaskController',
 			var paused=false;
 			var contTime;
 
-			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);;
-			taskRef.update({"buttonLabel": "resume task"});
+			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
+			taskRef.update({"buttonLabel": "resume"});
 			taskRef.update({"pauseIcon": "play_arrow"});
 			// taskRef.update({"contTime": taskTime});
 			
@@ -194,12 +194,78 @@ myApp.controller('TaskController',
 
 			if (!paused) {
 				//doesn't update quickly... alternate solution?
-				taskRef.update({"buttonLabel": "pause task"})
+				taskRef.update({"buttonLabel": "pause"})
 				taskRef.update({"pauseIcon": "pause"})
 				$scope.startTask(task, type, contTime);
 				
 			}
 		}
+
+		// add more according to how long user holds button
+
+
+		$scope.addTimeToTask = function(task, type, sign) {
+			// console.log(type, "type in addTimeToTask function passed by tasks.html");
+			// add one to this task, update
+			var contTime;
+			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
+			var taskOrigRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
+			taskOrigRef.on("value", function(snapshot) {
+				    if (snapshot.exists()) {
+				    	time = snapshot.val()["time"];
+				    }
+				}, function (errorObject) {
+				  console.log("The read failed: " + errorObject.code);
+			});
+
+			var timeToAdd;
+			if (type==='seconds') {
+				timeToAdd=1;
+			} else if (type==='minutes') {
+				timeToAdd=60;
+			} else {
+				timeToAdd=3600;
+			}
+
+			if (sign==="positive") {
+				time+=timeToAdd;
+
+			} else {
+				time-=timeToAdd;
+			}
+			
+			for (var t=0; t<$scope.taskList.length; t++) {
+				taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
+				var indTime;
+				taskRef.on("value", function(snapshot) {
+					    if (snapshot.exists()) {
+					    	indTime = snapshot.val()["time"];
+					    }
+					}, function (errorObject) {
+					  console.log("The read failed: " + errorObject.code);
+				});
+
+				if ($scope.taskList[t].$id!=task.$id) {
+					if (sign==="positive") {
+						indTime -= (timeToAdd/$scope.taskList.length);
+					} else {
+						indTime += (timeToAdd/$scope.taskList.length);
+					}
+					taskRef.update({"time": indTime});
+					taskRef.update({"timeDisplay": toTimeDisplay(indTime)});
+				} else {
+					taskRef.update({"time": time});
+					taskRef.update({"timeDisplay": toTimeDisplay(time)});
+				}
+			}
+
+			updateTasklist();
+
+
+		}
+
+
+		// stopping and deletion of tasks ********************************************************************************
 
 		var oldName="blankTask";
 		var oldTime=0;
@@ -207,7 +273,6 @@ myApp.controller('TaskController',
 		var newTime=0;
 
 
-		// stopping and deletion of tasks ********************************************************************************
 		$scope.stopTask = function(task, type) {
 			startOk=0;
 			console.log(taskTime);
@@ -266,7 +331,7 @@ myApp.controller('TaskController',
   		}
 
 
-		var constructTaskData = function(task, time) {
+		var constructTaskData = function(task, currentTimeDisplay, time) {
   			if (task==null) {
   				name="blankTask";
   			}
@@ -276,7 +341,8 @@ myApp.controller('TaskController',
 
   			return {
   				name: task,
-  				timeDisplay: time				
+  				timeDisplay: time,
+  				currentTimeDisplay: currentTimeDisplay				
   			}
   		}
 
@@ -284,13 +350,11 @@ myApp.controller('TaskController',
 			var taskRefDel = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 			var taskDel = $firebaseObject(taskRefDel);
 			// console.log(task.timeDisplay, "td");
-			addDelTasks(constructTaskData(oldName, task.timeDisplay));
+			addDelTasks(constructTaskData(oldName, task.currentTimeDisplay, task.timeDisplay));
 
 			taskDel.$remove(task.$id);
-			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
-			var tasksInfo = $firebaseArray(tasksRef);
 
-			$scope.taskList = tasksInfo;
+			updateTasklist();
 		}
 
 		// keep track of num deleted?

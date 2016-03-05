@@ -14,7 +14,6 @@
                     <label for={{type}}>{{type}}</label>
                 </li>
             </ul>
-
             <button type="submit" ng-disabled="myform.$invalid" class="btn waves-effect submit_btn">
                 Submit<i class="material-icons right">system_update_alt</i>
             </button>
@@ -26,15 +25,15 @@
     <table class="highlight centered">
         <div class="collection-item"><tr class=""><h5>&nbsp;&nbsp;&nbsp;Tasks to Complete</h5></tr></div>
         <tr ng-repeat="task in taskList" class="collection-item">
-            <td><input type="text" placeholder="{{task.name}}" ng-model="taskName" id="taskName"  ng-keyup="$event.keyCode == 13 && renameTask(task, taskName)" class="left"></td>
+            <td><input type="text" placeholder="{{task.name}}" ng-model="taskName" id="taskName"  ng-keyup="$event.keyCode == 13 && renameTask(task, taskName)" class="left renamer"></td>
             <td ng-if="!task.showPaused"><button ng-click="startTask(task, task.type, task.contTime)" class="btn waves-effect start_btn" >
-                Start Task<i class="material-icons right">play_arrow</i>
+                Start<i class="material-icons right">play_arrow</i>
             </button></td>
             <td ng-if="task.showPaused"><button ng-click="pauseOrResumeTask(task, task.type, task.contTime)" class="btn waves-effect start_btn">
                 {{task.buttonLabel}}<i class="material-icons right">{{task.pauseIcon}}</i>
             </button></td>
             <td><button ng-click="stopTask(task, task.type)" class="btn waves-effect">
-                Complete Task<i class="material-icons right">done</i>
+                Complete<i class="material-icons right">done</i>
             </button></td>
             <td><span class="">
                     <span ng-if="!task.showCurrent">00:00:00</span>
@@ -42,7 +41,11 @@
                     <span ng-if="task.showPaused">{{task.currentTime}} </span> -->
                     <span ng-if="task.showCurrent">{{task.currentTimeDisplay}}</span>
                     <!-- <span ng-if="task.showPaused">{{task.currentTime}} </span> -->
-                | {{task.timeDisplay}}</span></td>
+                | {{task.timeDisplay}} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <button class="btn-floating btn-tiny waves-effect waves-light brown lighten-2" ng-click="addTimeToTask(task, timeType.type, 'positive')"><i class="material-icons">add</i></button>
+                <button class="btn-floating btn-small waves-effect waves-light brown lighten-2" ng-click="addTimeToTask(task, timeType.type, 'negative')"><i class="material-icons">remove</i></button>
+            </td>
+                
         </tr> 
     </table>
 </div>
@@ -52,7 +55,7 @@
     <div class="collection-item"><h5>Completed Tasks</h5></div>
     <li ng-repeat="task in delTaskList" class="collection-item">
         {{task.name}} 
-        <span class="right">{{task.currentTime}} | {{task.timeDisplay}} </span>
+        <span class="right">{{task.currentTimeDisplay}} | {{task.timeDisplay}} </span>
     </li>
     <div class="collection-item">
         <button ng-click="clearDeletedTasks()" class="btn">
