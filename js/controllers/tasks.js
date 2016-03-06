@@ -147,6 +147,7 @@ myApp.controller('TaskController',
 		}
 
 		var numLocked=0;
+
 		$scope.updateNumLocked = function() {
 			var numLockedRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/numLocked');
 			numLocked = 0;	
@@ -319,13 +320,26 @@ myApp.controller('TaskController',
 
 				if ($scope.taskList[t].$id!=task.$id) {
 					if (sign==="positive") {
-						indTime -= (timeToAdd/($scope.taskList.length-1));
+						indTime -= (timeToAdd/($scope.taskList.length-1-numLocked));
 					} else {
-						indTime += (timeToAdd/($scope.taskList.length-1));
+						indTime += (timeToAdd/($scope.taskList.length-1-numLocked));
 					}
 					indTime = abs(indTime);
-					taskRef.update({"time": indTime});
-					taskRef.update({"timeDisplay": toTimeDisplay(indTime)});
+
+					var locked;
+					taskRef.once("value", function(snapshot) {
+						    if (snapshot.exists()) {
+						    	locked = snapshot.val()["locked"];
+						    }
+						}, function (errorObject) {
+						  console.log("The read failed: " + errorObject.code);
+					});
+
+
+					if (isFinite(indTime)&&(!locked)) {
+						taskRef.update({"time": indTime});
+						taskRef.update({"timeDisplay": toTimeDisplay(indTime)});
+					}
 				} else {
 					taskRef.update({"time": time});
 					taskRef.update({"timeDisplay": toTimeDisplay(time)});
@@ -476,7 +490,7 @@ myApp.controller('TaskController',
 			var taskRefDel = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 			var taskDel = $firebaseObject(taskRefDel);
 			// console.log(task.timeDisplay, "td");
-			addDelTasks(constructTaskData(oldName, task.currentTimeDisplay, task.timeDisplay));
+			addDelTasks(constructTaskData(task.name, task.currentTimeDisplay, task.timeDisplay));
 
 			taskDel.$remove(task.$id);
 
@@ -525,4 +539,11 @@ myApp.controller('TaskController',
 // Just on time! (difference<5%)
 // Maybe a little quicker next time! (difference > -20%)
 // You really took your time on that one! (difference > -100%)
+
+
+// Bugs:
+
+// Adding and subtracting time need to consider locks.
+// Save name for tasks.
+// Add specific time frame
 
