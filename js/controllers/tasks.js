@@ -139,6 +139,7 @@ myApp.controller('TaskController',
 			} //userAuthenticated
 		}) //on Authentication
 
+
 		$scope.renameTask = function(task, taskName) {
 			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 			// taskRef.set({name: taskName, time: time/tasks});
@@ -169,13 +170,18 @@ myApp.controller('TaskController',
 			}
 
 			numLockedRef.set({"numLocked": numLocked});
-
-
-
 			console.log("updated numLocked to", numLocked);
 
-
 		}
+
+		// Too heavy for performance.
+		// $scope.globalContTime=0;
+		// $scope.globalTotalTime=0;
+
+		// $scope.updateGlobalTimes {
+
+		// }
+
 
 
 		$scope.lockTask = function(task) {
@@ -277,11 +283,14 @@ myApp.controller('TaskController',
 		$scope.addTimeToTask = function(task, type, sign) {
 			var contTime;
 			var time;
+			var origLocked;
 			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
 			var taskOrigRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 			taskOrigRef.on("value", function(snapshot) {
 				    if (snapshot.exists()) {
 				    	time = snapshot.val()["time"];
+				    	origLocked=snapshot.val()["locked"];
+
 				    }
 				}, function (errorObject) {
 				  console.log("The read failed: " + errorObject.code);
@@ -305,50 +314,52 @@ myApp.controller('TaskController',
 			$scope.updateNumLocked();
 			// time = abs(time);
 
+			if (!origLocked) {
+				for (var t=0; t<$scope.taskList.length; t++) {
+					var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
+					var indTime;
 
-			for (var t=0; t<$scope.taskList.length; t++) {
-				var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
-				var indTime;
-
-				// console.log(indTime);
-				taskRef.once("value", function(snapshot) {
-					    if (snapshot.exists()) {
-					    	indTime = snapshot.val()["time"];
-					    }
-					}, function (errorObject) {
-					  console.log("The read failed: " + errorObject.code);
-				});
-
-				// $scope.updateNumLocked();
-
-				if ($scope.taskList[t].$id!=task.$id) {
-					if (sign==="positive") {
-						indTime -= (timeToAdd/($scope.taskList.length-1-numLocked));
-						console.log("positive", indTime);
-					} else {
-						indTime += (timeToAdd/($scope.taskList.length-1-numLocked));
-						console.log("negative", indTime);
-					}
-					indTime = abs(indTime);
-
-					var locked;
+					// console.log(indTime);
 					taskRef.once("value", function(snapshot) {
 						    if (snapshot.exists()) {
-						    	locked = snapshot.val()["locked"];
+						    	indTime = snapshot.val()["time"];
 						    }
 						}, function (errorObject) {
 						  console.log("The read failed: " + errorObject.code);
 					});
 
+					// $scope.updateNumLocked();
 
-					if ((!locked)) {
-						taskRef.update({"time": indTime});
-						taskRef.update({"timeDisplay": toTimeDisplay(indTime)});
+					if ($scope.taskList[t].$id!=task.$id) {
+						if (sign==="positive") {
+							indTime -= (timeToAdd/($scope.taskList.length-1-numLocked));
+							console.log("positive", indTime);
+						} else {
+							indTime += (timeToAdd/($scope.taskList.length-1-numLocked));
+							console.log("negative", indTime);
+						}
+						indTime = abs(indTime);
+
+						var locked;
+						taskRef.once("value", function(snapshot) {
+							    if (snapshot.exists()) {
+							    	locked = snapshot.val()["locked"];
+							    }
+							}, function (errorObject) {
+							  console.log("The read failed: " + errorObject.code);
+						});
+
+
+						if ((!locked)) {
+							taskRef.update({"time": indTime});
+							taskRef.update({"timeDisplay": toTimeDisplay(indTime)});
+						}
+					} else {
+						taskRef.update({"time": time});
+						taskRef.update({"timeDisplay": toTimeDisplay(time)});
 					}
-				} else {
-					taskRef.update({"time": time});
-					taskRef.update({"timeDisplay": toTimeDisplay(time)});
 				}
+
 			}
 
 			updateTasklist();
@@ -512,6 +523,8 @@ myApp.controller('TaskController',
 		}
 }]);
 
+
+
 // ******************************************************************************************************************
 // ******************************************************************************************************************
 // Goals:
@@ -530,8 +543,8 @@ myApp.controller('TaskController',
 // Mom's input:
 // Pause/Resume button [check]
 // Add and Subtract time for each task. [check]
-// Reset times? - Clear all button, that simply removes each task, but does not add thetime.
-// locks?
+// Reset times? - Clear all button, that simply removes each task, but does not add thetime.[check]
+// locks? [check]
 
 // Projects.
 
