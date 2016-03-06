@@ -276,6 +276,7 @@ myApp.controller('TaskController',
 
 		$scope.addTimeToTask = function(task, type, sign) {
 			var contTime;
+			var time;
 			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
 			var taskOrigRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 			taskOrigRef.on("value", function(snapshot) {
@@ -301,15 +302,15 @@ myApp.controller('TaskController',
 			} else {
 				time-=timeToAdd;
 			}
-			
-			time = abs(time);
+			$scope.updateNumLocked();
+			// time = abs(time);
 
 
 			for (var t=0; t<$scope.taskList.length; t++) {
-				taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
+				var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
 				var indTime;
 
-				console.log(indTime);
+				// console.log(indTime);
 				taskRef.once("value", function(snapshot) {
 					    if (snapshot.exists()) {
 					    	indTime = snapshot.val()["time"];
@@ -318,11 +319,15 @@ myApp.controller('TaskController',
 					  console.log("The read failed: " + errorObject.code);
 				});
 
+				// $scope.updateNumLocked();
+
 				if ($scope.taskList[t].$id!=task.$id) {
 					if (sign==="positive") {
 						indTime -= (timeToAdd/($scope.taskList.length-1-numLocked));
+						console.log("positive", indTime);
 					} else {
 						indTime += (timeToAdd/($scope.taskList.length-1-numLocked));
+						console.log("negative", indTime);
 					}
 					indTime = abs(indTime);
 
@@ -336,7 +341,7 @@ myApp.controller('TaskController',
 					});
 
 
-					if (isFinite(indTime)&&(!locked)) {
+					if ((!locked)) {
 						taskRef.update({"time": indTime});
 						taskRef.update({"timeDisplay": toTimeDisplay(indTime)});
 					}
@@ -505,7 +510,6 @@ myApp.controller('TaskController',
 		    record.$remove(delTasksRef);
 			$scope.delTaskList = [];
 		}
-
 }]);
 
 // ******************************************************************************************************************
@@ -521,6 +525,7 @@ myApp.controller('TaskController',
 
 // Ideas:
 
+// add globalContTime/globalTime in TasksToComplete header.
 
 // Mom's input:
 // Pause/Resume button [check]
@@ -542,8 +547,3 @@ myApp.controller('TaskController',
 // global Time
 
 // Bugs:
-
-// Adding and subtracting time need to consider locks.
-// Save name for tasks.
-// Add specific time frame
-
