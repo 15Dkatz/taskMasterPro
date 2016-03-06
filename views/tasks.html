@@ -5,25 +5,25 @@
     </div>
 </div> -->
 <div class="collection"> 
-        <form novalidate> 
+        <form novalidate>
             <div class="collection-item">
-                <input type="text" ng-model="tasks" placeholder="Number of tasks?" ng-required="true">
+                <input type="text" ng-model="time" placeholder="How much time do you have?" ng-required="true">
+                <ul class="inline">
+                    <li ng-repeat="type in timeTypes" class="inline">
+                        <input type="radio" ng-model="timeType.type" ng-value="type" name="type" id="{{type}}" class="inline">
+                        <label for={{type}}>{{type}}</label>
+                    </li>
+                </ul>
+            </div> 
+            <div class="collection-item">
+                <input type="text" ng-model="tasks" placeholder="How many tasks do you need to do?" ng-required="true">
             </div>
             <div class="collection-item">
-                <input type="text" ng-model="time" placeholder="Total time for tasks?" ng-required="true">
-            </div>
-            <div class="collection-item">
-                <div>&nbsp;</div>
+                <!-- <div>&nbsp;</div> -->
                 <div>
-                    <ul class="inline">
-                        <li ng-repeat="type in timeTypes" class="inline">
-                            <input type="radio" ng-model="timeType.type" ng-value="type" name="type" id="{{type}}" class="inline">
-                            <label for={{type}}>{{type}}</label>
-                        </li>
-                    </ul>
                     <button ng-click="genTasks(tasks, time, timeType.type)" ng-disabled="myform.$invalid" class="btn waves-effect submit_btn">
                         Submit<i class="material-icons right">system_update_alt</i>
-                    </button>
+                    </button><span>&nbsp;&nbsp;&nbsp;</span>
                     <button ng-disabled="myform.$invalid" class="btn waves-effect submit_btn" ng-click="genTasks(1, time, timeType.type)">
                         Quick Add<i class="material-icons right">add</i>
                     </button>
@@ -66,21 +66,12 @@
                 <!-- <a ng-click="$lockTask(task)"> -->
                 <div class="switch" >
                     <label>
-                        <!-- <span class="btn-floating btn-tiny waves-effect waves-light brown lighten-2" ng-click="addTimeToTask(task, timeType.type, 'positive')"> -->
-                        <!-- <i class="material-icons">lock_open</i> -->
                         Locked
                         </span>
-                        <!-- <span> -->
                             <input ng-if="task.locked == true" type="checkbox" checked ng-click="lockTask(task)" >
-                        <!-- </span> -->
-                        <!-- <span ng-if="task.locked != true"> -->
                             <input ng-if="task.locked != true" type="checkbox"  ng-click="lockTask(task)">
-                        <!-- </span> -->
                         <span class="lever "></span>
-                        <!-- <span class="btn-floating btn-tiny waves-effect waves-light red lighten-2" ng-click="addTimeToTask(task, timeType.type, 'positive')"> -->
-                        <!-- <i class="material-icons">lock_outline</i> -->
                         Unlocked
-                        <!-- </span> -->
                     </label>
                 </div>
             </td>

@@ -539,7 +539,7 @@ myApp.controller('TaskController',
 // Just on time! (difference<5%)
 // Maybe a little quicker next time! (difference > -20%)
 // You really took your time on that one! (difference > -100%)
-
+// global Time
 
 // Bugs:
 
