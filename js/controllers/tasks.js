@@ -522,6 +522,7 @@ myApp.controller('TaskController',
 			var globalTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/globalTime');
 
 			globalTimeRef.set({"globalTime": 0});
+			globalTime = 0;
 		}
 
 
