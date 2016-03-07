@@ -679,7 +679,7 @@ myApp.controller('TaskController',
 
 			$scope.globalTime = toTimeDisplay(newGlobalTime);
 
-			globalTimeRef.set("globalTime": newGlobalTime);
+			globalTimeRef.set({"globalTime": newGlobalTime});
 
 
 
