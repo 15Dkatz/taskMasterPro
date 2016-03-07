@@ -172,6 +172,16 @@ myApp.controller('TaskController',
 
 					// figure out bug that causes incorrect $scope.globalTime setting on second submit.
 
+					globalTimeRef.once("value", function(snapshot) {
+					    if (snapshot.exists()) {
+						    	intialGlobalTime = snapshot.val()["globalTime"];
+						    	console.log("intialGlobalTime:", intialGlobalTime);
+						    	$scope.globalTime = toTimeDisplay(intialGlobalTime);
+						    }
+						}, function (errorObject) {
+						  console.log("The read failed: " + errorObject.code);
+					});
+
 
 					intialGlobalTime+=time;
 					globalTimeRef.set({"globalTime": intialGlobalTime});
@@ -515,14 +525,16 @@ myApp.controller('TaskController',
 			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
 		    var record = $firebaseObject(tasksRef);
 		    record.$remove(tasksRef);
+
+
 			updateTasklist();
 			$scope.updateNumLocked();
 			updateGlobalTimes();
 
-			var globalTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/globalTime');
+			// var globalTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/globalTime');
 
-			globalTimeRef.set({"globalTime": 0});
-			globalTime = 0;
+			// globalTimeRef.set({"globalTime": 0});
+			// globalTime = 0;
 		}
 
 
