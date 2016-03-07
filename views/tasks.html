@@ -23,7 +23,7 @@
                     <label for="seconds"></label>seconds
                 </div> 
                 <div class="input-field col s3">
-                    <input ng-model="tasks" id="tasks"type="text" placeholder="this many"></input>
+                    <input ng-model="tasks" id="tasks"type="text" placeholder="for this many"></input>
                     <label for="tasks"></label>tasks
                 </div>
             </div>
@@ -47,20 +47,22 @@
 </div>
 
 <div class="collection">
-    <div class="collection-item"><h5>Tasks to Complete</h5></div>
+    <div class="collection-item">
+        <h5>Tasks to Complete</h5>
+
+    </div>
     <div class="collection-item">
     <!-- just use a fucking select option. -->
     <!-- why is this not working...!?!?!?!? -->
     <form>
-
-            Add time in
+            Change time in
             <ul class="inline">
-                    <li ng-repeat="type in timeTypes" class="inline">
-                        <input type="radio" ng-model="timeType.type" ng-value="type" name="type" id="{{type}}" class="inline">
-                        <label for={{type}}>{{type}}</label>
-                    </li>
-                </ul>
-
+                <li ng-repeat="type in timeTypes" class="inline">
+                    <input type="radio" ng-model="timeType.type" ng-value="type" name="type" id="{{type}}" class="inline">
+                    <label for={{type}}>{{type}}</label>
+                </li>
+            </ul>
+            <h6 ng-init="init()" class="right">{{globalContTime}} | {{globalTime}}</h6>
     </form>
     </div>
     <table class="highlight centered collection-item">

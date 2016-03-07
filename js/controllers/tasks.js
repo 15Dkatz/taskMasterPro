@@ -6,15 +6,23 @@ myApp.controller('TaskController',
 		var auth = $firebaseAuth(ref);
 
   		var tasksInfo;
+
   		var updateTasklist = function() {
   			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
 			tasksInfo = $firebaseArray(tasksRef);
 
 			$scope.taskList = tasksInfo;
+			// $scope.updateGlobalTimes();
   		}
 
+  // 		$scope.init = function(){
+		// 	updateTasklist();
+		// 	updateGlobalTimes();
+		// 	updateNumLocked();
+		// }
 
-  		$scope.timeTypes = ["seconds", "minutes", "hours"];
+
+  		$scope.timeTypes = ["hours", "minutes", "seconds"];
   		$scope.timeType = {type: "seconds"};
 
 
@@ -73,32 +81,62 @@ myApp.controller('TaskController',
 			if (authUser) {
 				updateTasklist();
 				updateDelTaskList();
+				$scope.updateGlobalTimes();
 
 				$scope.genTasks = function(tasks, hours, minutes, seconds) {
 					$scope.logoutStatus = true;
-					// switch(type) {
-					// 	case ('seconds'):
-					// 		time=time;
-					// 		break;
-					// 	case ('minutes'):
-					// 		time*=60;
-					// 		break;
-					// 	case ('hours'):
-					// 		time*=3600;
-					// 		break;
+					if (!hours) {
+						hours = 0;
+					}
+					if (!minutes) {
+						minutes = 0;
+					}
+					if (!seconds) {
+						seconds = 0;
+					}
+					if (!tasks) {
+						tasks=1;
+					}
 
-					// }
 					var time = 0;
 				    time += hours*3600;
-				    console.log(time, "time hours");
+				    // console.log(time, "time hours");
 				    time += minutes*60;
-				    console.log(time, "+minutes");
+				    // console.log(time, "+minutes");
 				    time += seconds*1;
-				    console.log(time, "+seconds");
+				    // console.log(time, "+seconds");
 
-					console.log(seconds, "s", minutes, "m", hours, "h");
+					// console.log(seconds, "s", minutes, "m", hours, "h");
 
-					console.log(time, "time");
+					// console.log(time, "time");
+					// find the value of globalTime within the set, and add this time to global time to set.
+					// globalTime+=time;
+					// $scope.globalTime = toTimeDisplay(globalTime);
+
+
+					// var globalTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/globalTime');
+					// var intialGlobalTime;
+					// globalTimeRef.once("value", function(snapshot) {
+					// 	    if (snapshot.exists()) {
+					// 	    	intialGlobalTime = snapshot.val()["globalTime"];
+					// 	    	console.log("intialGlobalTime:", intialGlobalTime);
+					// 	    }
+					// 	}, function (errorObject) {
+					// 	  console.log("The read failed: " + errorObject.code);
+					// });
+
+					// if (intialGlobalTime>0) {
+					// 	$scope.globalTime = toTimeDisplay(intialGlobalTime);	
+					// } else {
+					// 	globalTime+=time;
+					// 	$scope.globalTime = toTimeDisplay(globalTime);
+					// 	// globalTimeRef.set({"globalTime": intialGlobalTime});
+					// }
+					
+
+					// $scope.globalTime = toTimeDisplay(globalTime);
+
+					// $scope.globalTime = toTimeDisplay(globalTime);
 
 					var setTime = Math.ceil((time/tasks)*100)/100;
 
@@ -146,8 +184,11 @@ myApp.controller('TaskController',
 				} 
 
 					$scope.taskList = tasksInfo;
-				} 
+				}
+
+				
 			} //userAuthenticated
+			// $scope.updateGlobalTimes(); 
 		}) //on Authentication
 
 
@@ -185,15 +226,6 @@ myApp.controller('TaskController',
 
 		}
 
-		// Too heavy for performance.
-		// $scope.globalContTime=0;
-		// $scope.globalTotalTime=0;
-
-		// $scope.updateGlobalTimes {
-
-		// }
-
-
 
 		$scope.lockTask = function(task) {
 			taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
@@ -226,13 +258,64 @@ myApp.controller('TaskController',
 			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 			taskTime += 1;
 			$scope.$apply(function() {
-				console.log(taskTime, "changing Display", type);
+				// console.log(taskTime, "changing Display", type);
 				taskRef.update({"contTime": taskTime})
 				taskRef.update({"currentTimeDisplay": toTimeDisplay(taskTime)});
+				$scope.updateGlobalTimes();
 			});
+			// $scope.updateGlobalTimes();
 		}
 
 		var startOk = 0;
+
+		$scope.globalTime = toTimeDisplay(0);
+		$scope.globalContTime = toTimeDisplay(0);
+		var globalTime = 0;
+		var globalContTime = 0;
+
+		// updateTasklist();
+
+		$scope.updateGlobalTimes = function() {
+			globalTime = 0;
+			globalContTime = 0;
+
+			for (var t=0; t<$scope.taskList.length; t++) {
+				var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
+				// var locked;
+				taskRef.once("value", function(snapshot) {
+					    if (snapshot.exists()) {
+					    	globalTime += snapshot.val()["time"];
+					    	globalContTime += snapshot.val()["contTime"];
+					    	console.log("globalContTime:", $scope.globalContTime, "globalTime:", $scope.globalTime);
+					    }
+					}, function (errorObject) {
+					  console.log("The read failed: " + errorObject.code);
+				});
+			}
+
+			var globalTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/globalTime');
+			// var intialGlobalTime;
+			// globalTimeRef.once("value", function(snapshot) {
+			// 	    if (snapshot.exists()) {
+			// 	    	intialGlobalTime = snapshot.val()["globalTime"];
+			// 	    }
+			// 	}, function (errorObject) {
+			// 	  console.log("The read failed: " + errorObject.code);
+			// });
+			globalTimeRef.set({"globalTime": globalTime});
+
+			$scope.globalTime = toTimeDisplay(globalTime);
+			$scope.globalContTime = toTimeDisplay(globalContTime);
+			console.log("globalContTime:", $scope.globalContTime, "globalTime:", $scope.globalTime);
+
+		}
+		// updateNumLocked();
+		// updateTasklist();
+		// $scope.updateGlobalTimes();
+
+
+
+
 
 		$scope.startTask = function(task, type, contTime) {
 			// $scope.currentTime="00:00:00";
@@ -324,6 +407,7 @@ myApp.controller('TaskController',
 			}
 			$scope.updateNumLocked();
 			// time = abs(time);
+			$scope.updateGlobalTimes();
 
 			if (!origLocked) {
 				for (var t=0; t<$scope.taskList.length; t++) {
@@ -344,10 +428,10 @@ myApp.controller('TaskController',
 					if ($scope.taskList[t].$id!=task.$id) {
 						if (sign==="positive") {
 							indTime -= (timeToAdd/($scope.taskList.length-1-numLocked));
-							console.log("positive", indTime);
+							// console.log("positive", indTime);
 						} else {
 							indTime += (timeToAdd/($scope.taskList.length-1-numLocked));
-							console.log("negative", indTime);
+							// console.log("negative", indTime);
 						}
 						indTime = abs(indTime);
 
@@ -374,6 +458,7 @@ myApp.controller('TaskController',
 			}
 
 			updateTasklist();
+			
 
 
 		}
@@ -384,6 +469,7 @@ myApp.controller('TaskController',
 		    record.$remove(tasksRef);
 			updateTasklist();
 			$scope.updateNumLocked();
+			$scope.updateGlobalTimes();
 		}
 
 
@@ -419,6 +505,8 @@ myApp.controller('TaskController',
 			});
 
 			$scope.updateNumLocked();
+			// $scope.updateGlobalTimes();
+
 
 			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
 			var tasksArray = $firebaseArray(tasksRef);
@@ -477,8 +565,9 @@ myApp.controller('TaskController',
 			}
 
 			$scope.deleteTask(task);
-
+			
 			updateTasklist();
+			$scope.updateGlobalTimes();
 			taskTime = 0;
 		}
 
@@ -574,6 +663,8 @@ myApp.controller('TaskController',
 // locks? [check]
 
 // Projects.
+
+// globalPause
 
 
 // add a delete taskButton that does not factor time
