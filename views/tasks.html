@@ -11,15 +11,15 @@
             <div class="row">
             <!-- <input type="text" ng-model="time" placeholder="How much time do you have?" ng-required="true"> -->
                 <div class="input-field col s3">
-                    <input ng-model="hours" id="hoursInput" type="text" placeholder="I have this many"></input>
+                    <input ng-model="hoursInput" id="hoursInput" type="text" placeholder="I have this many"></input>
                     <label for="hours"></label>hours
                 </div> 
                 <div class="input-field col s3">
-                    <input ng-model="minutes" id="minutesInput" type="text" placeholder="this many"></input>
+                    <input ng-model="minutesInput" id="minutesInput" type="text" placeholder="this many"></input>
                     <label for="minutes"></label>minutes
                 </div>
                 <div class="input-field col s3"> 
-                    <input ng-model="seconds" id="secondsInput" type="text" placeholder="this many"></input>
+                    <input ng-model="secondsInput" id="secondsInput" type="text" placeholder="this many"></input>
                     <label for="seconds"></label>seconds
                 </div> 
                 <div class="input-field col s3">
@@ -53,7 +53,7 @@
     <!-- why is this not working...!?!?!?!? -->
     <form>
 
-            Add in
+            Add time in
             <ul class="inline">
                     <li ng-repeat="type in timeTypes" class="inline">
                         <input type="radio" ng-model="timeType.type" ng-value="type" name="type" id="{{type}}" class="inline">

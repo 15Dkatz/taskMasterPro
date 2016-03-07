@@ -89,14 +89,14 @@ myApp.controller('TaskController',
 
 					// }
 					var time = 0;
-					   time += hours*3600;
-					   console.log(time, "time hours");
-					   time += minutes*60;
-					   console.log(time, "+minutes");
-					   time += seconds*1;
-					   console.log(time, "+seconds");
+				    time += hours*3600;
+				    console.log(time, "time hours");
+				    time += minutes*60;
+				    console.log(time, "+minutes");
+				    time += seconds*1;
+				    console.log(time, "+seconds");
 
-					 console.log(seconds, "s", minutes, "m", hours, "h");
+					console.log(seconds, "s", minutes, "m", hours, "h");
 
 					console.log(time, "time");
 
