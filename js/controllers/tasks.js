@@ -12,7 +12,7 @@ myApp.controller('TaskController',
 			tasksInfo = $firebaseArray(tasksRef);
 
 			$scope.taskList = tasksInfo;
-			// $scope.updateGlobalTimes();
+			// updateGlobalTimes();
   		}
 
   // 		$scope.init = function(){
@@ -77,11 +77,47 @@ myApp.controller('TaskController',
 			return minTwoDigits(taskTimeDate.getHours())+":"+minTwoDigits(taskTimeDate.getMinutes())+":"+minTwoDigits(taskTimeDate.getSeconds());
 		}
 
+		var displayToTime = function(timeDisplay) {
+			var taskTimeDate = new Date();
+
+			console.log("timeDisplay", timeDisplay);
+
+			var hours = parseInt(timeDisplay.substring(0, 2))*3600;
+			var minutes = parseInt(timeDisplay.substring(3, 5))*60;
+			var seconds = parseInt(timeDisplay.substring(6, 8))*1;
+
+			var sumTime = hours+minutes+seconds;
+
+			console.log("hours:", hours, "minutes:", minutes, "seconds:", seconds, "sumTime:", sumTime);
+
+
+
+			return sumTime;
+		}
+
+	
+
+
 		auth.$onAuth(function(authUser) {
+			updateTasklist();
 			if (authUser) {
 				updateTasklist();
 				updateDelTaskList();
-				$scope.updateGlobalTimes();
+				// updateGlobalTimes();
+
+				var globalTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/globalTime');
+				var intialGlobalTime;
+				globalTimeRef.once("value", function(snapshot) {
+					    if (snapshot.exists()) {
+					    	intialGlobalTime = snapshot.val()["globalTime"];
+					    	console.log("intialGlobalTime:", intialGlobalTime);
+					    	$scope.globalTime = toTimeDisplay(intialGlobalTime);
+					    }
+					}, function (errorObject) {
+					  console.log("The read failed: " + errorObject.code);
+				});
+
+
 
 				$scope.genTasks = function(tasks, hours, minutes, seconds) {
 					$scope.logoutStatus = true;
@@ -132,7 +168,16 @@ myApp.controller('TaskController',
 					// 	$scope.globalTime = toTimeDisplay(globalTime);
 					// 	// globalTimeRef.set({"globalTime": intialGlobalTime});
 					// }
-					
+					// var newGlobalTime = intialGlobalTime+time;
+
+					// figure out bug that causes incorrect $scope.globalTime setting on second submit.
+
+
+					intialGlobalTime+=time;
+					globalTimeRef.set({"globalTime": intialGlobalTime});
+					$scope.globalTime = toTimeDisplay(intialGlobalTime);
+
+
 
 					// $scope.globalTime = toTimeDisplay(globalTime);
 
@@ -186,9 +231,9 @@ myApp.controller('TaskController',
 					$scope.taskList = tasksInfo;
 				}
 
-				
+				// updateGlobalTimes();
 			} //userAuthenticated
-			// $scope.updateGlobalTimes(); 
+			// updateGlobalTimes(); 
 		}) //on Authentication
 
 
@@ -261,21 +306,24 @@ myApp.controller('TaskController',
 				// console.log(taskTime, "changing Display", type);
 				taskRef.update({"contTime": taskTime})
 				taskRef.update({"currentTimeDisplay": toTimeDisplay(taskTime)});
-				$scope.updateGlobalTimes();
+				updateGlobalTimes();
 			});
-			// $scope.updateGlobalTimes();
+			// updateGlobalTimes();
 		}
 
 		var startOk = 0;
 
-		$scope.globalTime = toTimeDisplay(0);
+		
+
+		// updateTasklist();
+		$scope.globalTime;
 		$scope.globalContTime = toTimeDisplay(0);
 		var globalTime = 0;
 		var globalContTime = 0;
 
-		// updateTasklist();
 
-		$scope.updateGlobalTimes = function() {
+		var updateGlobalTimes = function() {
+			// updateTasklist();
 			globalTime = 0;
 			globalContTime = 0;
 
@@ -311,7 +359,7 @@ myApp.controller('TaskController',
 		}
 		// updateNumLocked();
 		// updateTasklist();
-		// $scope.updateGlobalTimes();
+		// updateGlobalTimes();
 
 
 
@@ -407,7 +455,7 @@ myApp.controller('TaskController',
 			}
 			$scope.updateNumLocked();
 			// time = abs(time);
-			$scope.updateGlobalTimes();
+			updateGlobalTimes();
 
 			if (!origLocked) {
 				for (var t=0; t<$scope.taskList.length; t++) {
@@ -469,7 +517,7 @@ myApp.controller('TaskController',
 		    record.$remove(tasksRef);
 			updateTasklist();
 			$scope.updateNumLocked();
-			$scope.updateGlobalTimes();
+			updateGlobalTimes();
 		}
 
 
@@ -505,7 +553,7 @@ myApp.controller('TaskController',
 			});
 
 			$scope.updateNumLocked();
-			// $scope.updateGlobalTimes();
+			// updateGlobalTimes();
 
 
 			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
@@ -567,7 +615,7 @@ myApp.controller('TaskController',
 			$scope.deleteTask(task);
 			
 			updateTasklist();
-			$scope.updateGlobalTimes();
+			// updateGlobalTimes();
 			taskTime = 0;
 		}
 
@@ -619,9 +667,26 @@ myApp.controller('TaskController',
 			// console.log(task.timeDisplay, "td");
 			// addDelTasks(constructTaskData(task.name, task.currentTimeDisplay, task.timeDisplay));
 
+			var globalTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/globalTime');
+			var newGlobalTime;
+
+			// console.log("task.time:", task.time);
+
+
+			newGlobalTime = displayToTime($scope.globalTime)-task.time;
+
+			console.log("newGlobalTime:", newGlobalTime);
+
+			$scope.globalTime = toTimeDisplay(newGlobalTime);
+
+
+
 			taskDel.$remove(task.$id);
 
 			updateTasklist();
+			// updateGlobalTimes();
+			// $scope.globalTimes -= 
+
 		}
 
 
