@@ -5,35 +5,64 @@
     </div>
 </div> -->
 <div class="collection"> 
-        <form novalidate>
-            <div class="collection-item">
-                <input type="text" ng-model="time" placeholder="How much time do you have?" ng-required="true">
-                <ul class="inline">
+    <!-- <div class="row"> -->
+    <div class="collection-item">
+        <form class="col s12">
+            <div class="row">
+            <!-- <input type="text" ng-model="time" placeholder="How much time do you have?" ng-required="true"> -->
+                <div class="input-field col s3">
+                    <input ng-model="hours" id="hoursInput" type="text" placeholder="I have this many"></input>
+                    <label for="hours"></label>hours
+                </div> 
+                <div class="input-field col s3">
+                    <input ng-model="minutes" id="minutesInput" type="text" placeholder="this many minutes"></input>
+                    <label for="minutes"></label>minutes
+                </div>
+                <div class="input-field col s3"> 
+                    <input ng-model="seconds" id="secondsInput" type="text" placeholder="this many seconds"></input>
+                    <label for="seconds"></label>seconds
+                </div> 
+                <div class="input-field col s3">
+                    <input ng-model="tasks" id="tasks"type="text" placeholder="this many tasks"></input>
+                    <label for="tasks"></label>tasks
+                </div>
+            </div>
+        </form>
+    </div>
+            <!-- </div>  -->
+       <!--  <div class="collection-item">
+            <input type="text" ng-model="tasks" placeholder="How many tasks do you need to do?" ng-required="true">
+        </div> -->
+    <div class="collection-item">
+        <!-- <div>&nbsp;</div> -->
+        <div>
+            <button ng-click="genTasks(tasks, hoursInput, minutesInput, secondsInput)" ng-disabled="myform.$invalid" class="btn waves-effect submit_btn">
+                Submit<i class="material-icons right">system_update_alt</i>
+            </button><span>&nbsp;&nbsp;&nbsp;</span>
+            <button ng-disabled="myform.$invalid" class="btn waves-effect submit_btn" ng-click="genTasks(1, hoursInput, minutesInput, secondsInput)">
+                Quick Add<i class="material-icons right">add_circle</i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="collection">
+    <div class="collection-item"><h5>Tasks to Complete</h5></div>
+    <div class="collection-item">
+    <!-- just use a fucking select option. -->
+    <!-- why is this not working...!?!?!?!? -->
+    <form>
+
+            Add in
+            <ul class="inline">
                     <li ng-repeat="type in timeTypes" class="inline">
                         <input type="radio" ng-model="timeType.type" ng-value="type" name="type" id="{{type}}" class="inline">
                         <label for={{type}}>{{type}}</label>
                     </li>
                 </ul>
-            </div> 
-            <div class="collection-item">
-                <input type="text" ng-model="tasks" placeholder="How many tasks do you need to do?" ng-required="true">
-            </div>
-            <div class="collection-item">
-                <!-- <div>&nbsp;</div> -->
-                <div>
-                    <button ng-click="genTasks(tasks, time, timeType.type)" ng-disabled="myform.$invalid" class="btn waves-effect submit_btn">
-                        Submit<i class="material-icons right">system_update_alt</i>
-                    </button><span>&nbsp;&nbsp;&nbsp;</span>
-                    <button ng-disabled="myform.$invalid" class="btn waves-effect submit_btn" ng-click="genTasks(1, time, timeType.type)">
-                        Quick Add<i class="material-icons right">add_circle</i>
-                    </button>
-                </div>
-            </div>
-        </form>
-</div>
 
-<div class="collection">
-    <div class="collection-item"><h5>Tasks to Complete</h5></div>
+    </form>
+    </div>
     <table class="highlight centered collection-item">
         <tr ng-repeat="task in taskList" class="collection-item">
             <td>&nbsp;</td>

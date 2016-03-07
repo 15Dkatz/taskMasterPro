@@ -43,7 +43,7 @@ myApp.controller('TaskController',
 		    console.log($scope.informationStatus);
 		}
 
-		var toTimeDisplay = function(time, type) {
+		var toTimeDisplay = function(time) {
 			var taskTimeDate = new Date();
 			var hours=0;
 			var minutes=0;
@@ -62,7 +62,7 @@ myApp.controller('TaskController',
 				minutes = (time-(hours*3600))/60;
 				seconds=time%60;
 			}
-			// console.log(seconds, "s", minutes, "m", hours, "h");
+			
 
 			taskTimeDate.setHours(hours, minutes, seconds);
 
@@ -74,20 +74,31 @@ myApp.controller('TaskController',
 				updateTasklist();
 				updateDelTaskList();
 
-				$scope.genTasks = function(tasks, time, type) {
+				$scope.genTasks = function(tasks, hours, minutes, seconds) {
 					$scope.logoutStatus = true;
-					switch(type) {
-						case ('seconds'):
-							time=time;
-							break;
-						case ('minutes'):
-							time*=60;
-							break;
-						case ('hours'):
-							time*=3600;
-							break;
+					// switch(type) {
+					// 	case ('seconds'):
+					// 		time=time;
+					// 		break;
+					// 	case ('minutes'):
+					// 		time*=60;
+					// 		break;
+					// 	case ('hours'):
+					// 		time*=3600;
+					// 		break;
 
-					}
+					// }
+					var time = 0;
+					   time += hours*3600;
+					   console.log(time, "time hours");
+					   time += minutes*60;
+					   console.log(time, "+minutes");
+					   time += seconds*1;
+					   console.log(time, "+seconds");
+
+					 console.log(seconds, "s", minutes, "m", hours, "h");
+
+					console.log(time, "time");
 
 					var setTime = Math.ceil((time/tasks)*100)/100;
 
@@ -96,7 +107,7 @@ myApp.controller('TaskController',
 					// currentTimeDate = new Date();
 
 					// console.log(setTime, "setTime"); 
-					myTimeDisplay = toTimeDisplay(setTime, type);
+					myTimeDisplay = toTimeDisplay(setTime);
 					// console.log(myTimeDisplay, "myTimeDisplay");
 
 					for (var t=0; t<tasks; t++) {
@@ -104,7 +115,7 @@ myApp.controller('TaskController',
 						name: "task" + String(t+1), 
 						time: setTime,
 						showCurrent: false,
-						type: type,
+						// type: type,
 						timeDisplay: myTimeDisplay,
 						currentTimeDisplay: "00:00:00",
 						buttonLabel: "pause",
@@ -217,7 +228,7 @@ myApp.controller('TaskController',
 			$scope.$apply(function() {
 				console.log(taskTime, "changing Display", type);
 				taskRef.update({"contTime": taskTime})
-				taskRef.update({"currentTimeDisplay": toTimeDisplay(taskTime, type)});
+				taskRef.update({"currentTimeDisplay": toTimeDisplay(taskTime)});
 			});
 		}
 
@@ -443,7 +454,7 @@ myApp.controller('TaskController',
 			newTime = (sumTimeOfTasks)/dividend;
 			newTime = Math.round(newTime*100)/100;
 			newTime = zerofy(newTime);
-			var newTimeDisplay = toTimeDisplay(newTime, type);
+			var newTimeDisplay = toTimeDisplay(newTime);
 
 			console.log("newTime: ", newTime, "newTimeDisplay", newTimeDisplay);
 
@@ -549,6 +560,10 @@ myApp.controller('TaskController',
 
 
 // Ideas:
+
+
+// add globalTime
+// when complete
 
 // add globalContTime/globalTime in TasksToComplete header.
 

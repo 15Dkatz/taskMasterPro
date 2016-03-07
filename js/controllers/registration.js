@@ -1,6 +1,6 @@
-$(document).ready(function() {
-  $(".dropdown-button").dropdown();
-})
+// $(document).ready(function() {
+//   $(".dropdown-button").dropdown();
+// })
 
 
 myApp.controller('RegistrationController',
