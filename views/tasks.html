@@ -25,7 +25,7 @@
                         Submit<i class="material-icons right">system_update_alt</i>
                     </button><span>&nbsp;&nbsp;&nbsp;</span>
                     <button ng-disabled="myform.$invalid" class="btn waves-effect submit_btn" ng-click="genTasks(1, time, timeType.type)">
-                        Quick Add<i class="material-icons right">add</i>
+                        Quick Add<i class="material-icons right">add_circle</i>
                     </button>
                 </div>
             </div>
@@ -46,13 +46,34 @@
                 <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                 <button class="btn-floating btn-small waves-effect waves-light brown lighten-2" ng-click="addTimeToTask(task, timeType.type, 'positive')"><i class="material-icons">add</i></button>
                 <button class="btn-floating btn-small waves-effect waves-light brown lighten-2" ng-click="addTimeToTask(task, timeType.type, 'negative')"><i class="material-icons">remove</i></button>
+                <!-- <div> -->
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <span>
+                    <button ng-if="task.locked == true" class="btn-floating btn-small waves-effect waves-light red lighten-2" ng-click="lockTask(task)"><i class="material-icons">lock</i></button>
+                    <button ng-if="task.locked != true" class="btn-floating btn-small waves-effect waves-light brown lighten-2" ng-click="lockTask(task)"><i class="material-icons">lock_open</i></button>
+                </span>
+            <!-- </div> -->
             </td>
-            <td ng-if="!task.showPaused"><button ng-click="startTask(task, task.type, task.contTime)" class="btn waves-effect start_btn" >
+            <!-- <td> -->
+                <!-- <a ng-click="$lockTask(task)"> -->
+                <!-- <div class="switch" >
+                    <label>
+                        Locked
+                        </span>
+                            <input ng-if="task.locked == true" type="checkbox" checked ng-click="lockTask(task)" >
+                            <input ng-if="task.locked != true" type="checkbox"  ng-click="lockTask(task)">
+                        <span class="lever "></span>
+                        Unlocked
+                    </label>
+                </div> -->
+                
+            <!-- </td> -->
+            <td ng-if="!task.showPaused"><button ng-click="startTask(task, task.type, task.contTime)" class="btn waves-effect" >
                 Start<i class="material-icons right">play_arrow</i>
             </button>
             </td>
             <td ng-if="task.showPaused">
-                <button ng-click="pauseOrResumeTask(task, task.type, task.contTime)" class="btn waves-effect start_btn">
+                <button ng-click="pauseOrResumeTask(task, task.type, task.contTime)" class="btn waves-effect">
                     {{task.buttonLabel}}<i class="material-icons right">{{task.pauseIcon}}</i>
                 </button>
             </td>
@@ -62,19 +83,10 @@
                 Complete<i class="material-icons right"></i>
                 </button>
             </td>
+            
             <td>
-                <!-- <a ng-click="$lockTask(task)"> -->
-                <div class="switch" >
-                    <label>
-                        Locked
-                        </span>
-                            <input ng-if="task.locked == true" type="checkbox" checked ng-click="lockTask(task)" >
-                            <input ng-if="task.locked != true" type="checkbox"  ng-click="lockTask(task)">
-                        <span class="lever "></span>
-                        Unlocked
-                    </label>
-                </div>
-            </td>
+                <button class="btn-floating btn-small waves-effect waves-light brown lighten-2" ng-click="hardDeleteTask(task)"><i class="material-icons">delete</i></button>
+            </td>>
         </tr> 
     </table>
     <div class="collection-item">

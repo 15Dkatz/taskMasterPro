@@ -513,6 +513,18 @@ myApp.controller('TaskController',
 			updateTasklist();
 		}
 
+		$scope.hardDeleteTask = function(task) {
+			var taskRefDel = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
+			var taskDel = $firebaseObject(taskRefDel);
+			// console.log(task.timeDisplay, "td");
+			// addDelTasks(constructTaskData(task.name, task.currentTimeDisplay, task.timeDisplay));
+
+			taskDel.$remove(task.$id);
+
+			updateTasklist();
+		}
+
+
 		// keep track of num deleted?
 
 		$scope.clearDeletedTasks = function() {
@@ -548,6 +560,8 @@ myApp.controller('TaskController',
 
 // Projects.
 
+
+// add a delete taskButton that does not factor time
 // add total time passed/total Time next to Tasks to Complete
 
 // User Feedback:
