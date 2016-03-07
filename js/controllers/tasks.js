@@ -679,6 +679,8 @@ myApp.controller('TaskController',
 
 			$scope.globalTime = toTimeDisplay(newGlobalTime);
 
+			globalTimeRef.set("globalTime": newGlobalTime);
+
 
 
 			taskDel.$remove(task.$id);
