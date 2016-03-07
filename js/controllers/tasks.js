@@ -144,34 +144,6 @@ myApp.controller('TaskController',
 
 					// console.log(seconds, "s", minutes, "m", hours, "h");
 
-					// console.log(time, "time");
-					// find the value of globalTime within the set, and add this time to global time to set.
-					// globalTime+=time;
-					// $scope.globalTime = toTimeDisplay(globalTime);
-
-
-					// var globalTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/globalTime');
-					// var intialGlobalTime;
-					// globalTimeRef.once("value", function(snapshot) {
-					// 	    if (snapshot.exists()) {
-					// 	    	intialGlobalTime = snapshot.val()["globalTime"];
-					// 	    	console.log("intialGlobalTime:", intialGlobalTime);
-					// 	    }
-					// 	}, function (errorObject) {
-					// 	  console.log("The read failed: " + errorObject.code);
-					// });
-
-					// if (intialGlobalTime>0) {
-					// 	$scope.globalTime = toTimeDisplay(intialGlobalTime);	
-					// } else {
-					// 	globalTime+=time;
-					// 	$scope.globalTime = toTimeDisplay(globalTime);
-					// 	// globalTimeRef.set({"globalTime": intialGlobalTime});
-					// }
-					// var newGlobalTime = intialGlobalTime+time;
-
-					// figure out bug that causes incorrect $scope.globalTime setting on second submit.
-
 					globalTimeRef.once("value", function(snapshot) {
 					    if (snapshot.exists()) {
 						    	intialGlobalTime = snapshot.val()["globalTime"];
@@ -187,19 +159,11 @@ myApp.controller('TaskController',
 					globalTimeRef.set({"globalTime": intialGlobalTime});
 					$scope.globalTime = toTimeDisplay(intialGlobalTime);
 
-
-
-					// $scope.globalTime = toTimeDisplay(globalTime);
-
-					// $scope.globalTime = toTimeDisplay(globalTime);
-
 					var setTime = Math.ceil((time/tasks)*100)/100;
 
 					var myTimeDate = new Date();
 					var myTimeDisplay = "";
-					// currentTimeDate = new Date();
 
-					// console.log(setTime, "setTime"); 
 					myTimeDisplay = toTimeDisplay(setTime);
 					// console.log(myTimeDisplay, "myTimeDisplay");
 
@@ -241,7 +205,6 @@ myApp.controller('TaskController',
 					$scope.taskList = tasksInfo;
 				}
 
-				// updateGlobalTimes();
 			} //userAuthenticated
 			// updateGlobalTimes(); 
 		}) //on Authentication
@@ -249,9 +212,7 @@ myApp.controller('TaskController',
 
 		$scope.renameTask = function(task, taskName) {
 			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
-			// taskRef.set({name: taskName, time: time/tasks});
 			taskRef.update({"name": taskName});
-			// console.log(taskRef + "   " + taskName);
 		}
 
 		var numLocked=0;
@@ -352,14 +313,6 @@ myApp.controller('TaskController',
 			}
 
 			var globalTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/globalTime');
-			// var intialGlobalTime;
-			// globalTimeRef.once("value", function(snapshot) {
-			// 	    if (snapshot.exists()) {
-			// 	    	intialGlobalTime = snapshot.val()["globalTime"];
-			// 	    }
-			// 	}, function (errorObject) {
-			// 	  console.log("The read failed: " + errorObject.code);
-			// });
 			globalTimeRef.set({"globalTime": globalTime});
 
 			$scope.globalTime = toTimeDisplay(globalTime);
@@ -367,12 +320,6 @@ myApp.controller('TaskController',
 			console.log("globalContTime:", $scope.globalContTime, "globalTime:", $scope.globalTime);
 
 		}
-		// updateNumLocked();
-		// updateTasklist();
-		// updateGlobalTimes();
-
-
-
 
 
 		$scope.startTask = function(task, type, contTime) {
@@ -681,28 +628,42 @@ myApp.controller('TaskController',
 		$scope.hardDeleteTask = function(task) {
 			var taskRefDel = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 			var taskDel = $firebaseObject(taskRefDel);
+
+			var paused;
+			var showPaused;
+			taskRefDel.once("value", function(snapshot) {
+				    if (snapshot.exists()) {
+				    	paused = snapshot.val()["paused"];
+				    	showPaused = snapshot.val()["showPaused"];
+				    }
+				}, function (errorObject) {
+				  console.log("The read failed: " + errorObject.code);
+			});
+
 			// console.log(task.timeDisplay, "td");
 			// addDelTasks(constructTaskData(task.name, task.currentTimeDisplay, task.timeDisplay));
 
 			var globalTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/globalTime');
 			var newGlobalTime;
 
-			// console.log("task.time:", task.time);
+			// console.log("task.time:", task.time);	
 
+			// check if works!!!!!!! ********
+			if ((!paused&&!showPaused)||(paused&&showPaused)) {
+				newGlobalTime = displayToTime($scope.globalTime)-task.time;
 
-			newGlobalTime = displayToTime($scope.globalTime)-task.time;
+				console.log("newGlobalTime:", newGlobalTime);
 
-			console.log("newGlobalTime:", newGlobalTime);
+				$scope.globalTime = toTimeDisplay(newGlobalTime);
 
-			$scope.globalTime = toTimeDisplay(newGlobalTime);
+				// globalTimeRef.set({"globalContTime"})
+				$scope.globalContTime = toTimeDisplay(0);
+				globalTimeRef.set({"globalTime": newGlobalTime});
 
-			globalTimeRef.set({"globalTime": newGlobalTime});
+				taskDel.$remove(task.$id);
 
-
-
-			taskDel.$remove(task.$id);
-
-			updateTasklist();
+				updateTasklist();
+			}
 			// updateGlobalTimes();
 			// $scope.globalTimes -= 
 
@@ -735,10 +696,7 @@ myApp.controller('TaskController',
 // Ideas:
 
 
-// add globalTime
-// when complete
-
-// add globalContTime/globalTime in TasksToComplete header.
+// add globalTime [check]
 
 // Mom's input:
 // Pause/Resume button [check]
@@ -746,8 +704,11 @@ myApp.controller('TaskController',
 // Reset times? - Clear all button, that simply removes each task, but does not add thetime.[check]
 // locks? [check]
 
-// Projects.
 
+// Timeline Projects.
+
+// global autoStart - starts each new task consecutively after completing, detracts only from globalTime.
+// radioButton - autoStart (on)/(off)
 // globalPause
 
 
@@ -764,3 +725,5 @@ myApp.controller('TaskController',
 // global Time
 
 // Bugs:
+// only HardDelete if not paused
+

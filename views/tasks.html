@@ -83,22 +83,7 @@
                     <button ng-if="task.locked == true" class="btn-floating btn-small waves-effect waves-light red lighten-2" ng-click="lockTask(task)"><i class="material-icons">lock</i></button>
                     <button ng-if="task.locked != true" class="btn-floating btn-small waves-effect waves-light brown lighten-2" ng-click="lockTask(task)"><i class="material-icons">lock_open</i></button>
                 </span>
-            <!-- </div> -->
             </td>
-            <!-- <td> -->
-                <!-- <a ng-click="$lockTask(task)"> -->
-                <!-- <div class="switch" >
-                    <label>
-                        Locked
-                        </span>
-                            <input ng-if="task.locked == true" type="checkbox" checked ng-click="lockTask(task)" >
-                            <input ng-if="task.locked != true" type="checkbox"  ng-click="lockTask(task)">
-                        <span class="lever "></span>
-                        Unlocked
-                    </label>
-                </div> -->
-                
-            <!-- </td> -->
             <td ng-if="!task.showPaused"><button ng-click="startTask(task, task.type, task.contTime)" class="btn waves-effect" >
                 Start<i class="material-icons right">play_arrow</i>
             </button>
