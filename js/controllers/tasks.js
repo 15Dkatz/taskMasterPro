@@ -143,12 +143,14 @@ myApp.controller('TaskController',
 				    // console.log(time, "+seconds");
 
 					// console.log(seconds, "s", minutes, "m", hours, "h");
+					var globalTimeExists;
 
 					globalTimeRef.once("value", function(snapshot) {
 					    if (snapshot.exists()) {
 						    	intialGlobalTime = snapshot.val()["globalTime"];
 						    	console.log("intialGlobalTime:", intialGlobalTime);
 						    	$scope.globalTime = toTimeDisplay(intialGlobalTime);
+						    	globalTimeExists=true;
 						    }
 						}, function (errorObject) {
 						  console.log("The read failed: " + errorObject.code);
@@ -156,7 +158,11 @@ myApp.controller('TaskController',
 
 
 					intialGlobalTime+=time;
-					globalTimeRef.set({"globalTime": intialGlobalTime});
+					
+					if (globalTimeExists) {
+						globalTimeRef.set({"globalTime": intialGlobalTime});	
+					}
+					
 					$scope.globalTime = toTimeDisplay(intialGlobalTime);
 
 					var setTime = Math.ceil((time/tasks)*100)/100;
@@ -664,13 +670,8 @@ myApp.controller('TaskController',
 
 				updateTasklist();
 			}
-			// updateGlobalTimes();
-			// $scope.globalTimes -= 
 
 		}
-
-
-		// keep track of num deleted?
 
 		$scope.clearDeletedTasks = function() {
 		    var delTasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/deletedTasks');
