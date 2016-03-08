@@ -120,6 +120,7 @@ myApp.controller('TaskController',
 
 
 				$scope.genTasks = function(tasks, hours, minutes, seconds) {
+					updateGlobalTimes();
 					$scope.logoutStatus = true;
 					if (!hours) {
 						hours = 0;
@@ -210,6 +211,11 @@ myApp.controller('TaskController',
 
 					$scope.taskList = tasksInfo;
 				}
+
+				// if ($scope.taskList.length==0) {
+				// 	$scope.clearTasks();
+				// }
+				updateGlobalTimes();
 
 			} //userAuthenticated
 			// updateGlobalTimes(); 
@@ -562,7 +568,10 @@ myApp.controller('TaskController',
 			newTime = zerofy(newTime);
 			var newTimeDisplay = toTimeDisplay(newTime);
 
-			console.log("newTime: ", newTime, "newTimeDisplay", newTimeDisplay);
+			// console.log("newTime: ", newTime, "newTimeDisplay", newTimeDisplay);
+
+			var nextTaskIndex = 0;
+
 
 			for (var t=0; t<$scope.taskList.length; t++) {
 				taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
@@ -578,15 +587,35 @@ myApp.controller('TaskController',
 					if ($scope.taskList[t].$id!=task.$id) {
 						taskRef.update({"timeDisplay": newTimeDisplay});
 						taskRef.update({"time": newTime});
-					}
+					} 
+					// else {
+					// 	if (t!=$scope.taskList.length-1) {
+					// 		nextTaskIndex = t+1;
+					// 	}
+					// }
 				} 
 			}
 
+
+			// start next task in list.
+			// taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
+
+
+
+			// delete task.
 			$scope.deleteTask(task);
 			
+
 			updateTasklist();
 			// updateGlobalTimes();
+
+
+			// resetting timer.
 			taskTime = 0;
+
+
+			// var nextTaskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[1].$id);
+			// $scope.startTask(nextTaskRef, nextTaskRef.type, nextTaskRef.contTime);
 		}
 
 
@@ -629,6 +658,7 @@ myApp.controller('TaskController',
 			taskDel.$remove(task.$id);
 
 			updateTasklist();
+			// updateGlobalTimes();
 		}
 
 		$scope.hardDeleteTask = function(task) {
@@ -727,4 +757,12 @@ myApp.controller('TaskController',
 
 // Bugs:
 // only HardDelete if not paused
+
+
+// add [enter] when user begins to rename task.
+
+
+// make an automatic function, which continuously takes away from global time, 
+// and starts the next task right away after completing each task
+
 
