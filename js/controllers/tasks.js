@@ -752,4 +752,5 @@ myApp.controller('TaskController',
 // possible solution, storing a taskList.length variable in firebase, and updating that variable as needed, and
 // using that variable to check throught program.
 // or to have such a variable within this js scope.
+
 // taskmaster now autostart by default.
