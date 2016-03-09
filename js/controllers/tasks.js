@@ -13,10 +13,6 @@ myApp.controller('TaskController',
 
 			$scope.taskList = tasksInfo;
 
-			// $scope.$apply(function() {
-			// 	updateGlobalTimes();
-			// });
-
   		}
 
   		$scope.timeTypes = ["hours", "minutes", "seconds"];
@@ -41,12 +37,6 @@ myApp.controller('TaskController',
 			return n;
 		}
 
-		// $scope.informationStatus = false;
-
-		// $scope.toggleInformation = function() {
-		//     $scope.informationStatus = !$scope.informationStatus;
-		//     console.log($scope.informationStatus);
-		// }
 
 		$scope.autostart = true;
 
@@ -349,38 +339,43 @@ myApp.controller('TaskController',
 
 
 		$scope.pauseOrResumeTask = function(task, type, contTime) {
+			// debugging
+			console.log("The boolean value of $scope.autostart is ", $scope.autostart);
 
-			clearInterval(timer);
-			var paused;
-			var contTime;
+			if ($scope.autostart==false) {
+				// make sure pause button only shows on a globalScale on not on each task if $scope.autostart===false
+				clearInterval(timer);
+				var paused;
+				var contTime;
 
-			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
-			taskRef.update({"buttonLabel": "resume"});
-			taskRef.update({"pauseIcon": "play_arrow"});
-			// taskRef.update({"contTime": taskTime});
-			
-			startOk = 0;
+				var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
+				taskRef.update({"buttonLabel": "resume"});
+				taskRef.update({"pauseIcon": "play_arrow"});
+				// taskRef.update({"contTime": taskTime});
+				
+				startOk = 0;
 
-			taskRef.on("value", function(snapshot) {
-				    if (snapshot.exists()) {
-				    	paused = snapshot.val()["paused"];
-				    	contTime = snapshot.val()["contTime"]; 
-				    	// console.log(contTime, "contTime!");
-				    }
-				    
-				}, function (errorObject) {
-				  console.log("The read failed: " + errorObject.code);
-			});
+				taskRef.on("value", function(snapshot) {
+					    if (snapshot.exists()) {
+					    	paused = snapshot.val()["paused"];
+					    	contTime = snapshot.val()["contTime"]; 
+					    	// console.log(contTime, "contTime!");
+					    }
+					    
+					}, function (errorObject) {
+					  console.log("The read failed: " + errorObject.code);
+				});
 
-			taskRef.update({"paused": !paused});
+				taskRef.update({"paused": !paused});
 
-			// important! setting the global taskTime to the current task's time
-			taskTime = contTime;
+				// important! setting the global taskTime to the current task's time
+				taskTime = contTime;
 
-			if (!paused) {
-				taskRef.update({"buttonLabel": "pause"})
-				taskRef.update({"pauseIcon": "pause"})
-				$scope.startTask(task, type, contTime);
+				if (paused==false) {
+					taskRef.update({"buttonLabel": "pause"})
+					taskRef.update({"pauseIcon": "pause"})
+					$scope.startTask(task, type, contTime);
+				}
 			}
 		}
 
@@ -747,10 +742,14 @@ myApp.controller('TaskController',
 // need to add an autostart functionality to make globalTime more purposeful - 
 // with a globalStart, and globalPuase method
 
+// only pause if autostart not on.
+
 
 // bug watch for updates on $scope.taskList.length - probably causing so many errors throughout code.
 // possible solution, storing a taskList.length variable in firebase, and updating that variable as needed, and
 // using that variable to check throught program.
 // or to have such a variable within this js scope.
-
 // taskmaster now autostart by default.
+
+// add the showEnter functionality when user begins to rename task to make sure the user presses enter when they rename a task.
+
