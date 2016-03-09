@@ -12,15 +12,12 @@ myApp.controller('TaskController',
 			tasksInfo = $firebaseArray(tasksRef);
 
 			$scope.taskList = tasksInfo;
-			// updateGlobalTimes();
+
+			// $scope.$apply(function() {
+			// 	updateGlobalTimes();
+			// });
+
   		}
-
-  // 		$scope.init = function(){
-		// 	updateTasklist();
-		// 	updateGlobalTimes();
-		// 	updateNumLocked();
-		// }
-
 
   		$scope.timeTypes = ["hours", "minutes", "seconds"];
   		$scope.timeType = {type: "seconds"};
@@ -85,26 +82,24 @@ myApp.controller('TaskController',
 			var hours = parseInt(timeDisplay.substring(0, 2))*3600;
 			var minutes = parseInt(timeDisplay.substring(3, 5))*60;
 			var seconds = parseInt(timeDisplay.substring(6, 8))*1;
-
 			var sumTime = hours+minutes+seconds;
 
 			console.log("hours:", hours, "minutes:", minutes, "seconds:", seconds, "sumTime:", sumTime);
-
-
-
 			return sumTime;
 		}
 
-	
-
+		// updateGlobalTimes();
+		// updateTasklist();
 
 		auth.$onAuth(function(authUser) {
+			// updateDelTaskList();
 			updateTasklist();
-			if (authUser) {
-				updateTasklist();
-				updateDelTaskList();
-				// updateGlobalTimes();
+			// updateGlobalTimes();
+			// $scope.$apply(function() {
+			// 	updateGlobalTimes();
+			// });
 
+			if (authUser) {
 				var globalTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/globalTime');
 				var intialGlobalTime;
 				globalTimeRef.once("value", function(snapshot) {
@@ -120,7 +115,7 @@ myApp.controller('TaskController',
 
 
 				$scope.genTasks = function(tasks, hours, minutes, seconds) {
-					updateGlobalTimes();
+					// updateGlobalTimes();
 					$scope.logoutStatus = true;
 					if (!hours) {
 						hours = 0;
@@ -143,7 +138,7 @@ myApp.controller('TaskController',
 				    time += seconds*1;
 				    // console.log(time, "+seconds");
 
-					// console.log(seconds, "s", minutes, "m", hours, "h");
+					console.log(seconds, "s", minutes, "m", hours, "h");
 					var globalTimeExists;
 
 					globalTimeRef.once("value", function(snapshot) {
@@ -210,15 +205,12 @@ myApp.controller('TaskController',
 				} 
 
 					$scope.taskList = tasksInfo;
+
 				}
 
-				// if ($scope.taskList.length==0) {
-				// 	$scope.clearTasks();
-				// }
-				updateGlobalTimes();
+				
 
 			} //userAuthenticated
-			// updateGlobalTimes(); 
 		}) //on Authentication
 
 
@@ -291,14 +283,12 @@ myApp.controller('TaskController',
 				taskRef.update({"currentTimeDisplay": toTimeDisplay(taskTime)});
 				updateGlobalTimes();
 			});
-			// updateGlobalTimes();
+
 		}
 
 		var startOk = 0;
 
 		
-
-		// updateTasklist();
 		$scope.globalTime;
 		$scope.globalContTime = toTimeDisplay(0);
 		var globalTime = 0;
@@ -306,17 +296,18 @@ myApp.controller('TaskController',
 
 
 		var updateGlobalTimes = function() {
-			// updateTasklist();
+				
 			globalTime = 0;
 			globalContTime = 0;
 
 			for (var t=0; t<$scope.taskList.length; t++) {
 				var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
-				// var locked;
+
 				taskRef.once("value", function(snapshot) {
 					    if (snapshot.exists()) {
 					    	globalTime += snapshot.val()["time"];
 					    	globalContTime += snapshot.val()["contTime"];
+					    	console.log("looking at task", t);
 					    	console.log("globalContTime:", $scope.globalContTime, "globalTime:", $scope.globalTime);
 					    }
 					}, function (errorObject) {
@@ -325,17 +316,17 @@ myApp.controller('TaskController',
 			}
 
 			var globalTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/globalTime');
+
 			globalTimeRef.set({"globalTime": globalTime});
 
 			$scope.globalTime = toTimeDisplay(globalTime);
 			$scope.globalContTime = toTimeDisplay(globalContTime);
-			console.log("globalContTime:", $scope.globalContTime, "globalTime:", $scope.globalTime);
+			console.log("globalContTime:", $scope.globalContTime, "globalTime:", $scope.globalTime, "taskList.length", $scope.taskList.length);
 
 		}
 
 
 		$scope.startTask = function(task, type, contTime) {
-			// $scope.currentTime="00:00:00";
 			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 			taskRef.update({"showCurrent": true});
 			taskRef.update({"showPaused": true});
@@ -380,11 +371,9 @@ myApp.controller('TaskController',
 			taskTime = contTime;
 
 			if (!paused) {
-				//doesn't update quickly... alternate solution?
 				taskRef.update({"buttonLabel": "pause"})
 				taskRef.update({"pauseIcon": "pause"})
 				$scope.startTask(task, type, contTime);
-				
 			}
 		}
 
@@ -485,15 +474,12 @@ myApp.controller('TaskController',
 		    var record = $firebaseObject(tasksRef);
 		    record.$remove(tasksRef);
 
+		    clearInterval(timer);
+
 
 			updateTasklist();
 			$scope.updateNumLocked();
 			updateGlobalTimes();
-
-			// var globalTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/globalTime');
-
-			// globalTimeRef.set({"globalTime": 0});
-			// globalTime = 0;
 		}
 
 
@@ -588,34 +574,15 @@ myApp.controller('TaskController',
 						taskRef.update({"timeDisplay": newTimeDisplay});
 						taskRef.update({"time": newTime});
 					} 
-					// else {
-					// 	if (t!=$scope.taskList.length-1) {
-					// 		nextTaskIndex = t+1;
-					// 	}
-					// }
 				} 
 			}
 
-
-			// start next task in list.
-			// taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
-
-
-
-			// delete task.
 			$scope.deleteTask(task);
-			
 
 			updateTasklist();
-			// updateGlobalTimes();
-
 
 			// resetting timer.
 			taskTime = 0;
-
-
-			// var nextTaskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[1].$id);
-			// $scope.startTask(nextTaskRef, nextTaskRef.type, nextTaskRef.contTime);
 		}
 
 
@@ -676,15 +643,12 @@ myApp.controller('TaskController',
 				  console.log("The read failed: " + errorObject.code);
 			});
 
-			// console.log(task.timeDisplay, "td");
-			// addDelTasks(constructTaskData(task.name, task.currentTimeDisplay, task.timeDisplay));
 
 			var globalTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/globalTime');
 			var newGlobalTime;
 
 			// console.log("task.time:", task.time);	
 
-			// check if works!!!!!!! ********
 			if ((!paused&&!showPaused)||(paused&&showPaused)) {
 				newGlobalTime = displayToTime($scope.globalTime)-task.time;
 
@@ -719,22 +683,11 @@ myApp.controller('TaskController',
 
 // Path: /Users/davidkatz/Coding/webDev/15Dkatz/15Dkatz.github.io/projects/taskMaster
 
-// Add minutes, and hours **********!
-// Improve UX significantly
-
-
 
 // Ideas:
 
 
 // add globalTime [check]
-
-// Mom's input:
-// Pause/Resume button [check]
-// Add and Subtract time for each task. [check]
-// Reset times? - Clear all button, that simply removes each task, but does not add thetime.[check]
-// locks? [check]
-
 
 // Timeline Projects.
 
@@ -742,9 +695,6 @@ myApp.controller('TaskController',
 // radioButton - autoStart (on)/(off)
 // globalPause
 
-
-// add a delete taskButton that does not factor time
-// add total time passed/total Time next to Tasks to Complete
 
 // User Feedback:
 // e.g.v 
@@ -757,12 +707,15 @@ myApp.controller('TaskController',
 
 // Bugs:
 // only HardDelete if not paused
-
-
-// add [enter] when user begins to rename task.
+// only clear if paused...!!!!!
 
 
 // make an automatic function, which continuously takes away from global time, 
 // and starts the next task right away after completing each task
 
 
+// need to add an autostart functionality to make globalTime more purposeful - 
+// 	with a globalStart, and globalPuase method
+
+
+// watch for pauses, handle the user attempting to clear if a task is paused.
