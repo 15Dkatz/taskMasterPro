@@ -464,22 +464,39 @@ myApp.controller('TaskController',
 			}
 
 			updateTasklist();
-			
-
-
 		}
 
 		$scope.clearTasks = function() {
-			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
-		    var record = $firebaseObject(tasksRef);
-		    record.$remove(tasksRef);
+			console.log("attempting clear.")
+			var clearOk = true;
+			for (var t=0; t<$scope.taskList.length; t++) {
+				taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
+				var paused;
+				var showPaused;
+				taskRef.once("value", function(snapshot) {
+					    if (snapshot.exists()) {
+					    	paused = snapshot.val()["paused"];
+					    	showPaused = snapshot.val()["showPaused"];
+					    }
+					}, function (errorObject) {
+					  console.log("The read failed: " + errorObject.code);
+				});				
+				if (paused===false&&showPaused===true) {
+					clearOk = false;
+				}
+			}			
 
-		    clearInterval(timer);
+			if (clearOk) {
+				var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
+			    var record = $firebaseObject(tasksRef);
+			    record.$remove(tasksRef);
 
+			    clearInterval(timer);
 
-			updateTasklist();
-			$scope.updateNumLocked();
-			updateGlobalTimes();
+				updateTasklist();
+				$scope.updateNumLocked();
+				updateGlobalTimes();
+			}
 		}
 
 
