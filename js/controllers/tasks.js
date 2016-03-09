@@ -41,11 +41,18 @@ myApp.controller('TaskController',
 			return n;
 		}
 
-		$scope.informationStatus = false;
+		// $scope.informationStatus = false;
 
-		$scope.toggleInformation = function() {
-		    $scope.informationStatus = !$scope.informationStatus;
-		    console.log($scope.informationStatus);
+		// $scope.toggleInformation = function() {
+		//     $scope.informationStatus = !$scope.informationStatus;
+		//     console.log($scope.informationStatus);
+		// }
+
+		$scope.autostart = true;
+
+		$scope.toggleAutostart = function() {
+			$scope.autostart = !$scope.autostart;
+			console.log("autostart status: ", $scope.autostart);
 		}
 
 		var toTimeDisplay = function(time) {
@@ -505,7 +512,7 @@ myApp.controller('TaskController',
 		var taskType="";
 		var newTime=0;
 
-		$scope.stopTask = function(task, type) {
+		$scope.stopTask = function(task, type, nextTask) {
 			startOk=0;
 			console.log(taskTime);
 			clearInterval(timer);
@@ -537,8 +544,6 @@ myApp.controller('TaskController',
 
 			var tasksRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks');
 			var tasksArray = $firebaseArray(tasksRef);
-
-			
 
 			var sumTimeOfTasks = 0;
 
@@ -596,10 +601,20 @@ myApp.controller('TaskController',
 
 			$scope.deleteTask(task);
 
+			// if ($scope.taskList.length<1) {
+			// 	updateGlobalTimes();
+			// 	console.log($scope.taskList.length, "is less than 1.")
+			// }
 			updateTasklist();
-
 			// resetting timer.
 			taskTime = 0;
+
+			// If auto-start on, start next task.
+			if ($scope.autostart) {
+				if (nextTask!=undefined) {
+					$scope.startTask(nextTask, nextTask.type, nextTask.contTime);
+				}
+			}
 		}
 
 
@@ -723,8 +738,6 @@ myApp.controller('TaskController',
 // global Time
 
 // Bugs:
-// only HardDelete if not paused
-// only clear if paused...!!!!!
 
 
 // make an automatic function, which continuously takes away from global time, 
@@ -732,7 +745,11 @@ myApp.controller('TaskController',
 
 
 // need to add an autostart functionality to make globalTime more purposeful - 
-// 	with a globalStart, and globalPuase method
+// with a globalStart, and globalPuase method
 
 
-// watch for pauses, handle the user attempting to clear if a task is paused.
+// bug watch for updates on $scope.taskList.length - probably causing so many errors throughout code.
+// possible solution, storing a taskList.length variable in firebase, and updating that variable as needed, and
+// using that variable to check throught program.
+// or to have such a variable within this js scope.
+// taskmaster now autostart by default.

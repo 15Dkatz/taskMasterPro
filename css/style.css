@@ -4,30 +4,16 @@
 }
 
 .inline {
-	/*display: block;*/
-	/*width: auto;*/
 	display: inline;
-	/*width: 200px;*/
 }
 
 
-/*.submit_btn  {
-	margin-left: 5%;
-}*/
-
-/*.start_btn {
-	margin-left: 10%;
-}
-*/
 .renamer::-webkit-input-placeholder {
    color: #000;
 }
 
-/*.btn-tiny {
-	width: vh;
-	height: 2vh;
-}*/
+.globalText {
+	font-size: 1.25rem;
+	margin-top: 12.5px;
+}
 
-/*input {
-	width: 10%;
-}*/

@@ -48,21 +48,34 @@
 
 <div class="collection">
     <div class="collection-item">
+        <span class="right globalText">{{globalContTime}} | {{globalTime}}</span>
         <h5>Tasks to Complete</h5>
 
     </div>
     <div class="collection-item">
-    <!-- just use a fucking select option. -->
-    <!-- why is this not working...!?!?!?!? -->
     <form>
-            Change time in
-            <ul class="inline">
-                <li ng-repeat="type in timeTypes" class="inline">
-                    <input type="radio" ng-model="timeType.type" ng-value="type" name="type" id="{{type}}" class="inline">
-                    <label for={{type}}>{{type}}</label>
-                </li>
-            </ul>
-            <h6 ng-init="init()" class="right">{{globalContTime}} | {{globalTime}}</h6>
+        Change time in<span>&nbsp;&nbsp;</span>
+        <ul class="inline">
+            <li ng-repeat="type in timeTypes" class="inline">
+                <input type="radio" ng-model="timeType.type" ng-value="type" name="type" id="{{type}}" class="inline">
+                <label for={{type}}>{{type}}</label>
+            </li>
+        </ul>
+
+
+        <span class="right">
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span class="switch">
+                Auto-Start<span>&nbsp;&nbsp;</span>
+                <label>
+                  Off
+                  <input ng-checked="autostart" type="checkbox" ng-click="toggleAutostart()">
+                  <span class="lever"></span>
+                  On
+                </label>
+            </span>
+            
+        </span>
     </form>
     </div>
     <table class="highlight centered collection-item">
@@ -95,7 +108,7 @@
             </td>
             <td>
 
-                <button ng-click="stopTask(task, task.type)" class="btn waves-effect">
+                <button ng-click="stopTask(task, task.type, taskList[$index+1])" class="btn waves-effect">
                 Complete<i class="material-icons right"></i>
                 </button>
             </td>
