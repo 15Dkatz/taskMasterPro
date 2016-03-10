@@ -208,7 +208,36 @@ myApp.controller('TaskController',
 		$scope.autostart = false;
 
 		$scope.toggleAutostart = function() {
-			$scope.autostart = !$scope.autostart;
+			// var allPaused = true;
+			// 	for (var t=0; t<$scope.taskList.length; t++) {
+			// 	taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
+			// 	var paused;
+			// 	// var showPaused;
+			// 	taskRef.once("value", function(snapshot) {
+			// 		    if (snapshot.exists()) {
+			// 		    	paused = snapshot.val()["paused"];
+			// 		    	// showPaused = snapshot.val()["showPaused"];
+			// 		    }
+			// 		}, function (errorObject) {
+			// 		  console.log("The read failed: " + errorObject.code);
+			// 	});				
+			// 	if (paused==false) {
+			// 		allPaused = false;
+			// 		// breaking
+			// 		t=$scope.taskList.length;
+			// 	}
+			// }	
+
+			// if ($scope.autoStart) {
+			// 	if (allPaused) {
+			// 		$scope.autostart = !$scope.autostart;
+			// 	}
+
+			// } else {
+				$scope.autostart = !$scope.autostart;
+			// }
+
+			
 			console.log("autostart status: ", $scope.autostart);
 			resetButtons();
 			clearInterval(timer);
@@ -232,7 +261,15 @@ myApp.controller('TaskController',
 						});
 
 						var taskRefObject = $firebaseObject(taskRef);
+						taskRef.update({"paused": true});
+						// taskRef.update({"showPaused": true});
+						// $scope.autostart=true;
+						taskRef.update({"showCurrent": true});
+						setTimeout(function() {
 						$scope.startTask(taskRefObject, type, contTime);
+						}, 10);
+
+						
 						console.log("starting first task.");
 					}
 				}, 600)
@@ -261,6 +298,7 @@ myApp.controller('TaskController',
 					
 					// taskRef.update({"buttonLabel": "pending"});
 					// taskRef.update({"buttonIcon": ""});
+
 					taskRef.update({"paused": false});
 					
 				} else {
@@ -398,10 +436,10 @@ myApp.controller('TaskController',
 			taskRef.update({"showCurrent": true});
 			taskRef.update({"showPaused": true});
 
-			if ($scope.autostart) {
-				taskRef.update({"buttonLabel": "skip"});
-				taskRef.update({"buttonIcon": "fast_forward"});
-			}
+			// if ($scope.autostart) {
+			// 	taskRef.update({"buttonLabel": "skip"});
+			// 	taskRef.update({"buttonIcon": "fast_forward"});
+			// }
 
 			// important! setting the global taskTime to the current task's time
 			taskTime = contTime;
@@ -833,3 +871,5 @@ myApp.controller('TaskController',
 
 
 // bug when you switch back to autostart off - start does not work 
+
+// fix bug in switching autostart back and forth, why wont autostart work automatically?
