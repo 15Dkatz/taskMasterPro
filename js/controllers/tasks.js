@@ -259,19 +259,35 @@ myApp.controller('TaskController',
 		var resetButtons = function() {
 			for (var t=0; t<$scope.taskList.length; t++) {
 				taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
+				// if contTime>0 {
+					// showPaused = true;
+				// }
+				var contTime;
+				taskRef.once("value", function(snapshot) {
+					    if (snapshot.exists()) {
+					    	contTime = snapshot.val()["contTime"];
+					    }
+					}, function (errorObject) {
+					  console.log("The read failed: " + errorObject.code);
+				});
+
 				if ($scope.autostart) {
 					taskRef.update({"showPaused": true});
 					
 					taskRef.update({"buttonLabel": "pending"});
 					taskRef.update({"buttonIcon": ""});
+					taskRef.update({"paused": false});
 					
 				} else {
-					taskRef.update({"showPaused": false});
-
-					taskRef.update({"buttonLabel": "pause"});
-					taskRef.update({"buttonIcon": "pause"});
+					if (contTime==0) {
+						taskRef.update({"showPaused": false});
+					} else {
+						taskRef.update({"showPaused": true});
+						taskRef.update({"paused": true});
+						taskRef.update({"buttonLabel": "resume"});
+						taskRef.update({"buttonIcon": "play_arrow"});
+					}
 				}
-				taskRef.update({"paused": false});
 				taskRef.update({"showCurrent": false});	
 			}	
 			updateTasklist();
@@ -468,45 +484,6 @@ myApp.controller('TaskController',
 			// taskRef.update({"showPaused": false});
 
 			var index=0;
-
-			// for (var t=0; t<$scope.taskList.length; t++) {
-			// 	var indexTaskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
-			// 	if (indexTaskRef.$id==task.$id) {
-			// 		index=t;
-			// 	}
-
-			// 	// i.once("value", function(snapshot) {
-			// 	// 	    if (snapshot.exists()) {
-			// 	// 	    	globalTime += snapshot.val()["time"];
-			// 	// 	    	globalContTime += snapshot.val()["contTime"];
-			// 	// 	    	console.log("looking at task", t);
-			// 	// 	    	console.log("globalContTime:", $scope.globalContTime, "globalTime:", $scope.globalTime);
-			// 	// 	    }
-			// 	// 	}, function (errorObject) {
-			// 	// 	  console.log("The read failed: " + errorObject.code);
-			// 	// });
-			// }
-
-			// if ($scope.taskList.length>1) {
-			// 	if (index==$scope.taskList.length-1) {
-			// 		index=0;
-			// 	}
-			// 	var nextTaskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[index+1].$id);
-			// 	var type;
-			// 	var contTime;
-			// 	nextTaskRef.once("value", function(snapshot) {
-			// 		    if (snapshot.exists()) {
-			// 		    	type = snapshot.val()["type"];
-			// 		    	contTime = snapshot.val()["contTime"];
-			// 		    }
-			// 		}, function (errorObject) {
-			// 		  console.log("The read failed: " + errorObject.code);
-			// 	});
-
-			// 	var nextTaskRefObject = $firebaseObject(taskRef);
-			// 	$scope.startTask(nextTaskRefObject, type, contTime);
-			// 	console.log("starting next task.");
-			// }
 
 			if (nextTask!=undefined) {
 				console.log("starting nextTask");
@@ -900,4 +877,10 @@ myApp.controller('TaskController',
 
 // if last task, go to the first task, on skip
 
+// add hard delete for autoStart tasks
+
 // fix skipping
+
+
+// bug when you switch back to autostart off - start does not work 
+// in the switch, consider those that already have showPause, and show Resume for them.
