@@ -12,7 +12,7 @@ myApp.controller('TaskController',
 			tasksInfo = $firebaseArray(tasksRef);
 
 			$scope.taskList = tasksInfo;
-
+			// resetButtons();
   		}
 
   		$scope.timeTypes = ["hours", "minutes", "seconds"];
@@ -38,12 +38,7 @@ myApp.controller('TaskController',
 		}
 
 
-		$scope.autostart = true;
-
-		$scope.toggleAutostart = function() {
-			$scope.autostart = !$scope.autostart;
-			console.log("autostart status: ", $scope.autostart);
-		}
+		
 
 		var toTimeDisplay = function(time) {
 			var taskTimeDate = new Date();
@@ -91,6 +86,7 @@ myApp.controller('TaskController',
 		auth.$onAuth(function(authUser) {
 			// updateDelTaskList();
 			updateTasklist();
+
 			// updateGlobalTimes();
 			// $scope.$apply(function() {
 			// 	updateGlobalTimes();
@@ -109,7 +105,11 @@ myApp.controller('TaskController',
 					  console.log("The read failed: " + errorObject.code);
 				});
 
-
+				setTimeout(function(){
+					console.log("reset called");
+					resetButtons();
+					// updateGlobalTimes();
+				}, 600);
 
 				$scope.genTasks = function(tasks, hours, minutes, seconds) {
 					// updateGlobalTimes();
@@ -177,12 +177,15 @@ myApp.controller('TaskController',
 						buttonLabel: "pause",
 						showPaused: false,
 						paused: false,
-						pauseIcon: "pause",
+						buttonIcon: "pause",
 						contTime: 0,
 						locked: false,
-						checked: "checked"
+						checked: "checked",
+						canSkip: false
 					}
 					tasksInfo.$add(taskData);
+
+					// resetButtons();
 
 				}
 
@@ -205,6 +208,7 @@ myApp.controller('TaskController',
 
 				}
 
+
 				
 
 			} //userAuthenticated
@@ -215,6 +219,66 @@ myApp.controller('TaskController',
 			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 			taskRef.update({"name": taskName});
 		}
+
+		$scope.autostart = false;
+
+		$scope.toggleAutostart = function() {
+			$scope.autostart = !$scope.autostart;
+			console.log("autostart status: ", $scope.autostart);
+			resetButtons();
+			clearInterval(timer);
+
+			if ($scope.autostart) {
+				setTimeout(function() {
+
+				console.log($scope.taskList.length, "$scope.taskList.length");
+
+					if ($scope.taskList.length>1) {
+						var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[0].$id);
+						var type;
+						var contTime;
+						taskRef.once("value", function(snapshot) {
+							    if (snapshot.exists()) {
+							    	type = snapshot.val()["type"];
+							    	contTime = snapshot.val()["contTime"];
+							    }
+							}, function (errorObject) {
+							  console.log("The read failed: " + errorObject.code);
+						});
+
+						var taskRefObject = $firebaseObject(taskRef);
+						$scope.startTask(taskRefObject, type, contTime);
+						console.log("starting first task.");
+					}
+				}, 600)
+
+			}
+		}
+
+
+		var resetButtons = function() {
+			for (var t=0; t<$scope.taskList.length; t++) {
+				taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
+				if ($scope.autostart) {
+					taskRef.update({"showPaused": true});
+					
+					taskRef.update({"buttonLabel": "pending"});
+					taskRef.update({"buttonIcon": ""});
+					
+				} else {
+					taskRef.update({"showPaused": false});
+
+					taskRef.update({"buttonLabel": "pause"});
+					taskRef.update({"buttonIcon": "pause"});
+				}
+				taskRef.update({"paused": false});
+				taskRef.update({"showCurrent": false});	
+			}	
+			updateTasklist();
+			console.log("resetting the buttons");
+		}
+
+
 
 		var numLocked=0;
 
@@ -314,7 +378,12 @@ myApp.controller('TaskController',
 
 			var globalTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/globalTime');
 
-			globalTimeRef.set({"globalTime": globalTime});
+			if (!isFinite(globalTime)) {
+				// globalTimeRef.set({"globalTime": 0});
+			} else {
+				globalTimeRef.set({"globalTime": globalTime});
+			}
+			
 
 			$scope.globalTime = toTimeDisplay(globalTime);
 			$scope.globalContTime = toTimeDisplay(globalContTime);
@@ -328,6 +397,11 @@ myApp.controller('TaskController',
 			taskRef.update({"showCurrent": true});
 			taskRef.update({"showPaused": true});
 
+			if ($scope.autostart) {
+				taskRef.update({"buttonLabel": "skip"});
+				taskRef.update({"buttonIcon": "fast_forward"});
+			}
+
 			// important! setting the global taskTime to the current task's time
 			taskTime = contTime;
 			if (startOk<1) {
@@ -338,19 +412,20 @@ myApp.controller('TaskController',
 		}
 
 
-		$scope.pauseOrResumeTask = function(task, type, contTime) {
+		$scope.pauseOrResumeTask = function(task, type, contTime, nextTask) {
 			// debugging
 			console.log("The boolean value of $scope.autostart is ", $scope.autostart);
+			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 
-			if ($scope.autostart==false) {
+			// if ($scope.autostart==false) {
 				// make sure pause button only shows on a globalScale on not on each task if $scope.autostart===false
 				clearInterval(timer);
 				var paused;
 				var contTime;
 
-				var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
+				// var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 				taskRef.update({"buttonLabel": "resume"});
-				taskRef.update({"pauseIcon": "play_arrow"});
+				taskRef.update({"buttonIcon": "play_arrow"});
 				// taskRef.update({"contTime": taskTime});
 				
 				startOk = 0;
@@ -373,15 +448,77 @@ myApp.controller('TaskController',
 
 				if (paused==false) {
 					taskRef.update({"buttonLabel": "pause"})
-					taskRef.update({"pauseIcon": "pause"})
+					taskRef.update({"buttonIcon": "pause"})
 					$scope.startTask(task, type, contTime);
+
+					console.log("updating label to pause");
 				}
-			}
+
 		}
+
+
+		$scope.skipTask = function(task) {
+			// current Task
+			// clearInterval(timer);
+			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
+			// taskRef.update("");
+			taskRef.update({"buttonLabel": "pending"});
+			taskRef.update({"buttonIcon": ""});
+			taskRef.update({"showCurrent": false});
+			// taskRef.update({"showPaused": false});
+
+			var index=0;
+
+			for (var t=0; t<$scope.taskList.length; t++) {
+				var indexTaskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
+				if (indexTaskRef.$id==task.$id) {
+					index=t;
+				}
+
+				// i.once("value", function(snapshot) {
+				// 	    if (snapshot.exists()) {
+				// 	    	globalTime += snapshot.val()["time"];
+				// 	    	globalContTime += snapshot.val()["contTime"];
+				// 	    	console.log("looking at task", t);
+				// 	    	console.log("globalContTime:", $scope.globalContTime, "globalTime:", $scope.globalTime);
+				// 	    }
+				// 	}, function (errorObject) {
+				// 	  console.log("The read failed: " + errorObject.code);
+				// });
+			}
+
+			if ($scope.taskList.length>1) {
+					if (index==$scope.taskList.length-1) {
+						index=0;
+					}
+					var nextTaskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[index+1].$id);
+					var type;
+					var contTime;
+					nextTaskRef.once("value", function(snapshot) {
+						    if (snapshot.exists()) {
+						    	type = snapshot.val()["type"];
+						    	contTime = snapshot.val()["contTime"];
+						    }
+						}, function (errorObject) {
+						  console.log("The read failed: " + errorObject.code);
+					});
+
+					var nextTaskRefObject = $firebaseObject(taskRef);
+					$scope.startTask(nextTaskRefObject, type, contTime);
+					console.log("starting next task.");
+				}
+
+			// if (nextTask!=undefined) {
+			// 	console.log("starting nextTask");
+			// 	$scope.startTask(nextTask, nextTask.type, nextTask.contTime);	
+			// }
+			
+		}
+
+
 
 		// add more according to how long user holds button
 		// ng-hold
-
 		$scope.addTimeToTask = function(task, type, sign) {
 			var contTime;
 			var time;
@@ -753,3 +890,14 @@ myApp.controller('TaskController',
 
 // add the showEnter functionality when user begins to rename task to make sure the user presses enter when they rename a task.
 
+// if autoStart on, change the start task button to pending, add a start button next to the globalCount which represents a global start
+// also each started task then turns into a skip, which starts the next task
+
+// bug on autostart off - only allow user to press start on a task, if one isn't already going.
+// run a full check of the entire status and only go if the user doen'st have a task running
+
+// fix skipping tasks.
+
+// if last task, go to the first task, on skip
+
+// fix skipping

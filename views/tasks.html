@@ -83,9 +83,13 @@
             <td>&nbsp;</td>
             <td><input type="text" placeholder="{{task.name}}" ng-model="taskName" id="taskName"  ng-keyup="$event.keyCode == 13 && renameTask(task, taskName)" class="left renamer"></td>
             <td><span class="">
-                <span ng-if="!task.showCurrent">00:00:00</span>
-                <span ng-if="task.showCurrent">{{task.currentTimeDisplay}}</span>
-                | {{task.timeDisplay}} </span>
+                <span ng-if="task.contTime==0">00:00:00</span>
+                <span ng-if="task.contTime>0">{{task.currentTimeDisplay}}</span>
+                <span>| {{task.timeDisplay}} </span>
+               <!--  <span ng-if="!task.showCurrent&&!autostart">{{task.currentTimeDisplay}}</span>
+                | {{task.timeDisplay}} </span> -->
+           <!--      <span ng-if="!task.showCurrentautostart">{{task.currentTimeDisplay}}</span>
+                | {{task.timeDisplay}} </span> -->
           <!--       <button class="btn-floating btn-tiny waves-effect waves-light brown lighten-2" ng-click="addTimeToTask(task, timeType.type, 'positive')"><i class="material-icons">lock</i></button> -->
                 <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                 <button class="btn-floating btn-small waves-effect waves-light brown lighten-2" ng-click="addTimeToTask(task, timeType.type, 'positive')"><i class="material-icons">add</i></button>
@@ -97,13 +101,18 @@
                     <button ng-if="task.locked != true" class="btn-floating btn-small waves-effect waves-light brown lighten-2" ng-click="lockTask(task)"><i class="material-icons">lock_open</i></button>
                 </span>
             </td>
-            <td ng-if="!task.showPaused"><button ng-click="startTask(task, task.type, task.contTime)" class="btn waves-effect" >
+            <td ng-if="task.showPaused==false"><button ng-click="startTask(task, task.type, task.contTime)" class="btn waves-effect" >
                 Start<i class="material-icons right">play_arrow</i>
             </button>
             </td>
-            <td ng-if="task.showPaused">
-                <button ng-click="pauseOrResumeTask(task, task.type, task.contTime)" class="btn waves-effect">
-                    {{task.buttonLabel}}<i class="material-icons right">{{task.pauseIcon}}</i>
+            <td ng-if="task.showPaused&&!autostart">
+                <button ng-click="pauseOrResumeTask(task, task.type, task.contTime, taskList[$index+1])" class="btn waves-effect">
+                    {{task.buttonLabel}}<i class="material-icons right">{{task.buttonIcon}}</i>
+                </button>
+            </td>
+            <td ng-if="task.showPaused&&autostart">
+                <button ng-click="skipTask(task, taskList[$index+1])" class="btn waves-effect">
+                    {{task.buttonLabel}}<i class="material-icons right">{{task.buttonIcon}}</i>
                 </button>
             </td>
             <td>
