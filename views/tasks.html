@@ -81,7 +81,12 @@
     <table class="highlight centered collection-item">
         <tr ng-repeat="task in taskList" class="collection-item">
             <td>&nbsp;</td>
-            <td><input type="text" placeholder="{{task.name}}" ng-model="taskName" id="taskName"  ng-keyup="$event.keyCode == 13 && renameTask(task, taskName)" class="left renamer"></td>
+            <td><input type="text" placeholder="{{task.name}}" ng-model="taskName" id="taskName" 
+            ng-mousemove="renameTask(task, taskName)"
+            ng-keyup="$event.keyCode == 13 && renameTask(task, taskName)" class="left renamer">
+            <!-- badge -->
+
+            </td>
             <td><span class="">
                 <span ng-if="task.contTime==0">00:00:00</span>
                 <span ng-if="task.contTime>0">{{task.currentTimeDisplay}}</span>
