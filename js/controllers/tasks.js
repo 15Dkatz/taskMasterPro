@@ -59,8 +59,6 @@ myApp.controller('TaskController',
 				minutes = (time-(hours*3600))/60;
 				seconds=time%60;
 			}
-			
-
 			taskTimeDate.setHours(hours, minutes, seconds);
 
 			return minTwoDigits(taskTimeDate.getHours())+":"+minTwoDigits(taskTimeDate.getMinutes())+":"+minTwoDigits(taskTimeDate.getSeconds());
@@ -80,17 +78,8 @@ myApp.controller('TaskController',
 			return sumTime;
 		}
 
-		// updateGlobalTimes();
-		// updateTasklist();
-
 		auth.$onAuth(function(authUser) {
-			// updateDelTaskList();
 			updateTasklist();
-
-			// updateGlobalTimes();
-			// $scope.$apply(function() {
-			// 	updateGlobalTimes();
-			// });
 
 			if (authUser) {
 				var globalTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/globalTime');
@@ -171,7 +160,6 @@ myApp.controller('TaskController',
 						name: "task" + String(t+1), 
 						time: setTime,
 						showCurrent: false,
-						// type: type,
 						timeDisplay: myTimeDisplay,
 						currentTimeDisplay: "00:00:00",
 						buttonLabel: "pause",
@@ -207,9 +195,6 @@ myApp.controller('TaskController',
 					$scope.taskList = tasksInfo;
 
 				}
-
-
-				
 
 			} //userAuthenticated
 		}) //on Authentication
@@ -492,8 +477,6 @@ myApp.controller('TaskController',
 			
 		}
 
-
-
 		// add more according to how long user holds button
 		// ng-hold
 		$scope.addTimeToTask = function(task, type, sign) {
@@ -545,15 +528,12 @@ myApp.controller('TaskController',
 						  console.log("The read failed: " + errorObject.code);
 					});
 
-					// $scope.updateNumLocked();
 
 					if ($scope.taskList[t].$id!=task.$id) {
 						if (sign==="positive") {
 							indTime -= (timeToAdd/($scope.taskList.length-1-numLocked));
-							// console.log("positive", indTime);
 						} else {
 							indTime += (timeToAdd/($scope.taskList.length-1-numLocked));
-							// console.log("negative", indTime);
 						}
 						indTime = abs(indTime);
 
@@ -826,15 +806,7 @@ myApp.controller('TaskController',
 
 
 // Ideas:
-
-
-// add globalTime [check]
-
 // Timeline Projects.
-
-// global autoStart - starts each new task consecutively after completing, detracts only from globalTime.
-// radioButton - autoStart (on)/(off)
-// globalPause
 
 
 // User Feedback:
@@ -847,15 +819,6 @@ myApp.controller('TaskController',
 // global Time
 
 // Bugs:
-
-
-// make an automatic function, which continuously takes away from global time, 
-// and starts the next task right away after completing each task
-
-
-// need to add an autostart functionality to make globalTime more purposeful - 
-// with a globalStart, and globalPuase method
-
 // only pause if autostart not on.
 
 
@@ -865,22 +828,8 @@ myApp.controller('TaskController',
 // or to have such a variable within this js scope.
 // taskmaster now autostart by default.
 
-// add the showEnter functionality when user begins to rename task to make sure the user presses enter when they rename a task.
-
 // if autoStart on, change the start task button to pending, add a start button next to the globalCount which represents a global start
 // also each started task then turns into a skip, which starts the next task
 
-// bug on autostart off - only allow user to press start on a task, if one isn't already going.
-// run a full check of the entire status and only go if the user doen'st have a task running
-
-// fix skipping tasks.
-
-// if last task, go to the first task, on skip
-
-// add hard delete for autoStart tasks
-
-// fix skipping
-
 
 // bug when you switch back to autostart off - start does not work 
-// in the switch, consider those that already have showPause, and show Resume for them.
