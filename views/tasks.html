@@ -106,15 +106,16 @@
             </button>
             </td>
             <td ng-if="task.showPaused&&!autostart">
-                <button ng-click="pauseOrResumeTask(task, task.type, task.contTime, taskList[$index+1])" class="btn waves-effect">
+                <button ng-click="pauseOrResumeTask(task, task.type, task.contTime)" class="btn waves-effect">
                     {{task.buttonLabel}}<i class="material-icons right">{{task.buttonIcon}}</i>
                 </button>
             </td>
-            <td ng-if="task.showPaused&&autostart">
+            <!-- fix method later -->
+           <!--  <td ng-if="task.showPaused&&autostart">
                 <button ng-click="skipTask(task, taskList[$index+1])" class="btn waves-effect">
                     {{task.buttonLabel}}<i class="material-icons right">{{task.buttonIcon}}</i>
                 </button>
-            </td>
+            </td> -->
             <td>
 
                 <button ng-click="stopTask(task, task.type, taskList[$index+1])" class="btn waves-effect">

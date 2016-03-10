@@ -457,7 +457,7 @@ myApp.controller('TaskController',
 		}
 
 
-		$scope.skipTask = function(task) {
+		$scope.skipTask = function(task, nextTask) {
 			// current Task
 			// clearInterval(timer);
 			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
@@ -469,49 +469,49 @@ myApp.controller('TaskController',
 
 			var index=0;
 
-			for (var t=0; t<$scope.taskList.length; t++) {
-				var indexTaskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
-				if (indexTaskRef.$id==task.$id) {
-					index=t;
-				}
+			// for (var t=0; t<$scope.taskList.length; t++) {
+			// 	var indexTaskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
+			// 	if (indexTaskRef.$id==task.$id) {
+			// 		index=t;
+			// 	}
 
-				// i.once("value", function(snapshot) {
-				// 	    if (snapshot.exists()) {
-				// 	    	globalTime += snapshot.val()["time"];
-				// 	    	globalContTime += snapshot.val()["contTime"];
-				// 	    	console.log("looking at task", t);
-				// 	    	console.log("globalContTime:", $scope.globalContTime, "globalTime:", $scope.globalTime);
-				// 	    }
-				// 	}, function (errorObject) {
-				// 	  console.log("The read failed: " + errorObject.code);
-				// });
-			}
-
-			if ($scope.taskList.length>1) {
-					if (index==$scope.taskList.length-1) {
-						index=0;
-					}
-					var nextTaskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[index+1].$id);
-					var type;
-					var contTime;
-					nextTaskRef.once("value", function(snapshot) {
-						    if (snapshot.exists()) {
-						    	type = snapshot.val()["type"];
-						    	contTime = snapshot.val()["contTime"];
-						    }
-						}, function (errorObject) {
-						  console.log("The read failed: " + errorObject.code);
-					});
-
-					var nextTaskRefObject = $firebaseObject(taskRef);
-					$scope.startTask(nextTaskRefObject, type, contTime);
-					console.log("starting next task.");
-				}
-
-			// if (nextTask!=undefined) {
-			// 	console.log("starting nextTask");
-			// 	$scope.startTask(nextTask, nextTask.type, nextTask.contTime);	
+			// 	// i.once("value", function(snapshot) {
+			// 	// 	    if (snapshot.exists()) {
+			// 	// 	    	globalTime += snapshot.val()["time"];
+			// 	// 	    	globalContTime += snapshot.val()["contTime"];
+			// 	// 	    	console.log("looking at task", t);
+			// 	// 	    	console.log("globalContTime:", $scope.globalContTime, "globalTime:", $scope.globalTime);
+			// 	// 	    }
+			// 	// 	}, function (errorObject) {
+			// 	// 	  console.log("The read failed: " + errorObject.code);
+			// 	// });
 			// }
+
+			// if ($scope.taskList.length>1) {
+			// 	if (index==$scope.taskList.length-1) {
+			// 		index=0;
+			// 	}
+			// 	var nextTaskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[index+1].$id);
+			// 	var type;
+			// 	var contTime;
+			// 	nextTaskRef.once("value", function(snapshot) {
+			// 		    if (snapshot.exists()) {
+			// 		    	type = snapshot.val()["type"];
+			// 		    	contTime = snapshot.val()["contTime"];
+			// 		    }
+			// 		}, function (errorObject) {
+			// 		  console.log("The read failed: " + errorObject.code);
+			// 	});
+
+			// 	var nextTaskRefObject = $firebaseObject(taskRef);
+			// 	$scope.startTask(nextTaskRefObject, type, contTime);
+			// 	console.log("starting next task.");
+			// }
+
+			if (nextTask!=undefined) {
+				console.log("starting nextTask");
+				$scope.startTask(nextTask, nextTask.type, nextTask.contTime);	
+			}
 			
 		}
 
