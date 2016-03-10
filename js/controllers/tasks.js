@@ -259,8 +259,8 @@ myApp.controller('TaskController',
 				if ($scope.autostart) {
 					taskRef.update({"showPaused": true});
 					
-					taskRef.update({"buttonLabel": "pending"});
-					taskRef.update({"buttonIcon": ""});
+					// taskRef.update({"buttonLabel": "pending"});
+					// taskRef.update({"buttonIcon": ""});
 					taskRef.update({"paused": false});
 					
 				} else {
