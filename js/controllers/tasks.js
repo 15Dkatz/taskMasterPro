@@ -247,7 +247,7 @@ myApp.controller('TaskController',
 
 				console.log($scope.taskList.length, "$scope.taskList.length");
 
-					if ($scope.taskList.length>1) {
+					if ($scope.taskList.length>=1) {
 						var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[0].$id);
 						var type;
 						var contTime;
@@ -873,3 +873,5 @@ myApp.controller('TaskController',
 // bug when you switch back to autostart off - start does not work 
 
 // fix bug in switching autostart back and forth, why wont autostart work automatically?
+
+// api for social good
