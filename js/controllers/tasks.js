@@ -80,6 +80,7 @@ myApp.controller('TaskController',
 
 		auth.$onAuth(function(authUser) {
 			updateTasklist();
+			startOk=0;
 
 			if (authUser) {
 				var globalTimeRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/globalTime');
@@ -208,34 +209,10 @@ myApp.controller('TaskController',
 		$scope.autostart = false;
 
 		$scope.toggleAutostart = function() {
-			// var allPaused = true;
-			// 	for (var t=0; t<$scope.taskList.length; t++) {
-			// 	taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + $scope.taskList[t].$id);
-			// 	var paused;
-			// 	// var showPaused;
-			// 	taskRef.once("value", function(snapshot) {
-			// 		    if (snapshot.exists()) {
-			// 		    	paused = snapshot.val()["paused"];
-			// 		    	// showPaused = snapshot.val()["showPaused"];
-			// 		    }
-			// 		}, function (errorObject) {
-			// 		  console.log("The read failed: " + errorObject.code);
-			// 	});				
-			// 	if (paused==false) {
-			// 		allPaused = false;
-			// 		// breaking
-			// 		t=$scope.taskList.length;
-			// 	}
-			// }	
+			// disable toggleAutostart if any task is currently going.
 
-			// if ($scope.autoStart) {
-			// 	if (allPaused) {
-			// 		$scope.autostart = !$scope.autostart;
-			// 	}
 
-			// } else {
-				$scope.autostart = !$scope.autostart;
-			// }
+			$scope.autostart = !$scope.autostart;
 
 			
 			console.log("autostart status: ", $scope.autostart);
@@ -243,6 +220,7 @@ myApp.controller('TaskController',
 			clearInterval(timer);
 
 			if ($scope.autostart) {
+				updateTasklist();
 				setTimeout(function() {
 
 				console.log($scope.taskList.length, "$scope.taskList.length");
@@ -262,15 +240,19 @@ myApp.controller('TaskController',
 
 						var taskRefObject = $firebaseObject(taskRef);
 						taskRef.update({"paused": true});
+
+						startOk=0;
 						// taskRef.update({"showPaused": true});
 						// $scope.autostart=true;
 						taskRef.update({"showCurrent": true});
 						setTimeout(function() {
-						$scope.startTask(taskRefObject, type, contTime);
+							$scope.startTask(taskRefObject, type, contTime);
 						}, 10);
 
+
+
 						
-						console.log("starting first task.");
+						console.log("starting first task.", taskRefObject);
 					}
 				}, 600)
 
@@ -300,18 +282,21 @@ myApp.controller('TaskController',
 					// taskRef.update({"buttonIcon": ""});
 
 					taskRef.update({"paused": false});
+					taskRef.update({"showCurrent": false});
 					
 				} else {
 					if (contTime==0) {
 						taskRef.update({"showPaused": false});
+						taskRef.update({"showCurrent": false});
 					} else {
 						taskRef.update({"showPaused": true});
+						taskRef.update({"showCurrent": true});
 						taskRef.update({"paused": true});
 						taskRef.update({"buttonLabel": "resume"});
 						taskRef.update({"buttonIcon": "play_arrow"});
 					}
 				}
-				taskRef.update({"showCurrent": false});	
+				// taskRef.update({"showCurrent": false});	
 			}	
 			updateTasklist();
 			console.log("resetting the buttons");
@@ -443,6 +428,7 @@ myApp.controller('TaskController',
 
 			// important! setting the global taskTime to the current task's time
 			taskTime = contTime;
+
 			if (startOk<1) {
 				timer=setInterval(addTime, 1000, task, type, contTime);
 			}
@@ -458,6 +444,7 @@ myApp.controller('TaskController',
 
 			// if ($scope.autostart==false) {
 				// make sure pause button only shows on a globalScale on not on each task if $scope.autostart===false
+				// if (startOk>0) {
 				clearInterval(timer);
 				var paused;
 				var contTime;
@@ -467,7 +454,7 @@ myApp.controller('TaskController',
 				taskRef.update({"buttonIcon": "play_arrow"});
 				// taskRef.update({"contTime": taskTime});
 				
-				startOk = 0;
+				// startOk = 0;
 
 				taskRef.on("value", function(snapshot) {
 					    if (snapshot.exists()) {
@@ -481,6 +468,14 @@ myApp.controller('TaskController',
 				});
 
 				taskRef.update({"paused": !paused});
+				// startOk=0;
+				// } else {
+				// if (paused) {
+				// 	startOk=1;
+				// } else {
+				// 	startOk=0;
+				// }
+
 
 				// important! setting the global taskTime to the current task's time
 				taskTime = contTime;
@@ -488,10 +483,13 @@ myApp.controller('TaskController',
 				if (paused==false) {
 					taskRef.update({"buttonLabel": "pause"})
 					taskRef.update({"buttonIcon": "pause"})
+					// startTask makes startOk = 0;
 					$scope.startTask(task, type, contTime);
+					// startOk+=1;
 
 					console.log("updating label to pause");
 				}
+			// }
 
 		}
 
@@ -875,3 +873,5 @@ myApp.controller('TaskController',
 // fix bug in switching autostart back and forth, why wont autostart work automatically?
 
 // api for social good
+
+// figure out startOk
