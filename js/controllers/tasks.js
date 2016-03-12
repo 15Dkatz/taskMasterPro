@@ -276,6 +276,7 @@ myApp.controller('TaskController',
 				});
 
 				if ($scope.autostart) {
+					// autostart on -> off
 					taskRef.update({"showPaused": true});
 					
 					// taskRef.update({"buttonLabel": "pending"});
@@ -285,6 +286,7 @@ myApp.controller('TaskController',
 					taskRef.update({"showCurrent": false});
 					
 				} else {
+					// autostart off -> on
 					if (contTime==0) {
 						taskRef.update({"showPaused": false});
 						taskRef.update({"showCurrent": false});
@@ -294,6 +296,7 @@ myApp.controller('TaskController',
 						taskRef.update({"paused": true});
 						taskRef.update({"buttonLabel": "resume"});
 						taskRef.update({"buttonIcon": "play_arrow"});
+						clearInterval(timer);
 					}
 				}
 				// taskRef.update({"showCurrent": false});	
@@ -438,45 +441,43 @@ myApp.controller('TaskController',
 			console.log("The boolean value of $scope.autostart is ", $scope.autostart);
 			var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 
-			var paused;
-			var contTime;
-
-
-			taskRef.on("value", function(snapshot) {
-				    if (snapshot.exists()) {
-				    	paused = snapshot.val()["paused"];
-				    	contTime = snapshot.val()["contTime"]; 
-				    	// console.log(contTime, "contTime!");
-				    }
-				    
-				}, function (errorObject) {
-				  console.log("The read failed: " + errorObject.code);
-			});
-
-			console.log("startOk", startOk, "paused:", paused);
-
-			
-			if (paused&&startOk<1) {
-				taskRef.update({"paused": !paused});
-			}
-
-			// ***Carefully consider the value of startOk, which supposedly becomes 1 when you resume or start a task
-			// to prevent 2 or more tasks from starting or resuming simultaneously.
-			if (paused==false&&startOk<1) {
-				taskRef.update({"buttonLabel": "pause"})
-				taskRef.update({"buttonIcon": "pause"})
-				$scope.startTask(task, type, contTime);
-
-				console.log("updating label to pause");
-			} else if (paused==false&&startOk==1) {
-
+			// if ($scope.autostart==false) {
+				// make sure pause button only shows on a globalScale on not on each task if $scope.autostart===false
 				clearInterval(timer);
-				taskTime = contTime;
+				var paused;
+				var contTime;
+
+				// var taskRef = new Firebase(FIREBASE_URL + 'users/' + $rootScope.currentUser.$id + '/tasks/' + task.$id);
 				taskRef.update({"buttonLabel": "resume"});
 				taskRef.update({"buttonIcon": "play_arrow"});
-				startOk=0;	
+				// taskRef.update({"contTime": taskTime});
+				
+				startOk = 0;
+
+				taskRef.on("value", function(snapshot) {
+					    if (snapshot.exists()) {
+					    	paused = snapshot.val()["paused"];
+					    	contTime = snapshot.val()["contTime"]; 
+					    	// console.log(contTime, "contTime!");
+					    }
+					    
+					}, function (errorObject) {
+					  console.log("The read failed: " + errorObject.code);
+				});
+
 				taskRef.update({"paused": !paused});
-			}
+
+				// important! setting the global taskTime to the current task's time
+				taskTime = contTime;
+
+				if (paused==false) {
+					taskRef.update({"buttonLabel": "pause"})
+					taskRef.update({"buttonIcon": "pause"})
+					$scope.startTask(task, type, contTime);
+
+					console.log("updating label to pause");
+				}
+
 
 		}
 
