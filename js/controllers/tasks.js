@@ -498,6 +498,7 @@ myApp.controller('TaskController',
 			
 		}
 
+
 		// add more according to how long user holds button
 		// ng-hold
 		$scope.addTimeToTask = function(task, type, sign) {
